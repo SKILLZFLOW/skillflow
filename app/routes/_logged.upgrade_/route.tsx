@@ -1,11 +1,9 @@
-import { Typography, Card, Button, Row, Col, message } from 'antd'
-const { Title, Text, Paragraph } = Typography
 import { useUserContext } from '@/core/context'
-import dayjs from 'dayjs'
-import { useLocation, useNavigate, useParams } from '@remix-run/react'
-import { useUploadPublic } from '@/plugins/upload/client'
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
+import { useNavigate } from '@remix-run/react'
+import { Button, Card, Col, Flex, message, Row, Typography } from 'antd'
+const { Title, Text, Paragraph } = Typography
 
 export default function UpgradePage() {
   const navigate = useNavigate()
@@ -18,12 +16,15 @@ export default function UpgradePage() {
 
   const handleUpgrade = async (productId: string) => {
     try {
-      const paymentLink = await createPaymentLink({ productId })
-      if (paymentLink) {
-        window.location.href = paymentLink
+      const { url } = await createPaymentLink({
+        productId,
+      })
+      if (url) {
+        window.location.href = url
       }
     } catch (error) {
-      message.error('Failed to process payment. Please try again.')
+      message.error('Fapshi payment processing failed. Please try again.')
+      console.error('Payment error:', error)
     }
   }
 
@@ -102,15 +103,33 @@ export default function UpgradePage() {
                   <Paragraph style={{ minHeight: 80 }}>
                     {product.description}
                   </Paragraph>
-                  <Button
-                    type="primary"
-                    size="large"
-                    block
-                    onClick={() => handleUpgrade(product.id)}
-                    icon={<i className="las la-arrow-right"></i>}
-                  >
-                    Upgrade Now
-                  </Button>
+                  <Flex vertical gap={8}>
+                    <Button
+                      type="primary"
+                      size="large"
+                      block
+                      onClick={() => handleUpgrade(product.id)}
+                      icon={<img src="/fapshi-icon.png" alt="Fapshi" style={{height: '16px', marginRight: '8px'}}/>}
+                      style={{
+                        background: '#FF6B00', 
+                        borderColor: '#FF6B00',
+                        boxShadow: '0 2px 0 rgba(255, 107, 0, 0.1)',
+                        fontWeight: 600
+                      }}
+                      className="hover:opacity-90 transition-opacity"
+                    >
+                      Pay with Fapshi
+                    </Button>
+                    <Button
+                      type="default"
+                      size="large"
+                      block
+                      onClick={() => window.open('/pricing', '_blank')}
+                      icon={<i className="las la-info-circle"></i>}
+                    >
+                      Learn More
+                    </Button>
+                  </Flex>
                 </Card>
               </Col>
             ))
@@ -120,7 +139,7 @@ export default function UpgradePage() {
         <div style={{ textAlign: 'center', marginTop: 48 }}>
           <Text type="secondary">
             <i className="las la-lock" style={{ marginRight: 8 }}></i>
-            Secure payment powered by Fapshi
+            Secure payment powered by Fapshi - Premium Features Await!
           </Text>
         </div>
       </div>

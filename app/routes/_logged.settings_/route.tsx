@@ -1,26 +1,23 @@
-import {
-  Typography,
-  Switch,
-  Form,
-  Input,
-  Button,
-  Card,
-  Row,
-  Col,
-  message,
-} from 'antd'
-import { useState } from 'react'
-const { Title, Text } = Typography
-import { useUserContext } from '@/core/context'
-import dayjs from 'dayjs'
-import { useLocation, useNavigate, useParams } from '@remix-run/react'
-import { useUploadPublic } from '@/plugins/upload/client'
+import { useTheme, useUserContext } from '@/core/context'
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
+import {
+  Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  message,
+  Row,
+  Space,
+  Switch,
+  Typography,
+} from 'antd'
+const { Title, Text } = Typography
 
 export default function SettingsPage() {
   const { user } = useUserContext()
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  const { isDarkMode, toggleTheme } = useTheme()
   const [form] = Form.useForm()
 
   const { data: userData, refetch } = Api.user.findFirst.useQuery({
@@ -34,9 +31,24 @@ export default function SettingsPage() {
   const { mutateAsync: deleteSocialAccount } =
     Api.socialAccount.delete.useMutation()
 
+  const { mutateAsync: logout } = Api.authentication.logout.useMutation({
+    onSuccess: data => {
+      if (data.redirect) {
+        window.location.href = data.redirect
+      }
+    },
+  })
+
+  const handleClickLogout = async () => {
+    try {
+      await logout()
+    } catch (error) {
+      message.error('Failed to logout')
+    }
+  }
+
   const handleThemeChange = (checked: boolean) => {
-    setIsDarkMode(checked)
-    document.body.classList.toggle('dark-theme', checked)
+    toggleTheme()
   }
 
   const handleProfileUpdate = async (values: any) => {
@@ -119,9 +131,14 @@ export default function SettingsPage() {
                 <Form.Item label="Email" name="email">
                   <Input placeholder="Enter your email" />
                 </Form.Item>
-                <Button type="primary" htmlType="submit">
-                  <i className="las la-save"></i> Save Changes
-                </Button>
+                <Space>
+                  <Button type="primary" htmlType="submit">
+                    <i className="las la-save"></i> Save Changes
+                  </Button>
+                  <Button danger onClick={handleClickLogout}>
+                    <i className="las la-sign-out-alt"></i> Logout
+                  </Button>
+                </Space>
               </Form>
             </Card>
           </Col>

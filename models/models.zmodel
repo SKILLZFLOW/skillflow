@@ -10,7 +10,7 @@ model User {
     pictureUrl          String?         @default('https://i.imgur.com/ZdJSK3Y.jpeg')
     tokenInvitation     String?
 
-    stripeCustomerId    String?
+    fapshiCustomerId    String?
 
     status              UserStatus      @default(VERIFIED)
 
@@ -130,3 +130,4 @@ model SocialAccount {
     @@allow("all", true)
 }
 
+  
