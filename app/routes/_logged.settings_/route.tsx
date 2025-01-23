@@ -1,4 +1,4 @@
-import { useTheme, useUserContext } from '@/core/context'
+import { useUserContext } from '@/core/context'
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
 import {
@@ -10,14 +10,12 @@ import {
   message,
   Row,
   Space,
-  Switch,
   Typography,
 } from 'antd'
 const { Title, Text } = Typography
 
 export default function SettingsPage() {
   const { user } = useUserContext()
-  const { isDarkMode, toggleTheme } = useTheme()
   const [form] = Form.useForm()
 
   const { data: userData, refetch } = Api.user.findFirst.useQuery({
@@ -45,10 +43,6 @@ export default function SettingsPage() {
     } catch (error) {
       message.error('Failed to logout')
     }
-  }
-
-  const handleThemeChange = (checked: boolean) => {
-    toggleTheme()
   }
 
   const handleProfileUpdate = async (values: any) => {
@@ -108,7 +102,7 @@ export default function SettingsPage() {
         <Text>Manage your account settings and preferences</Text>
 
         <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
-          <Col xs={24} lg={12}>
+          <Col xs={24}>
             <Card
               title={
                 <>
@@ -143,20 +137,7 @@ export default function SettingsPage() {
             </Card>
           </Col>
 
-          <Col xs={24} lg={12}>
-            <Card
-              title={
-                <>
-                  <i className="las la-palette"></i> Appearance
-                </>
-              }
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Switch checked={isDarkMode} onChange={handleThemeChange} />
-                <Text>Dark Mode</Text>
-              </div>
-            </Card>
-
+          <Col xs={24}>
             <Card
               title={
                 <>

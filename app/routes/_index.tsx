@@ -10,9 +10,13 @@ import {
   LandingSocialProof,
   LandingSocialRating,
   LandingTestimonials,
+  PageLayout,
 } from '~/designSystem'
+import { ErrorBoundary } from '~/designSystem/core'
+import { useDesignSystem } from '~/designSystem/provider'
 
 export default function LandingPage() {
+  const { isLoading } = useDesignSystem()
   const features = [
     {
       heading: `Premium Digital Skills Courses`,
@@ -175,57 +179,61 @@ export default function LandingPage() {
   ]
 
   return (
-    <LandingContainer navItems={navItems}>
-      <LandingHero
-        title={`Transform Your Skills into Income in the Digital Economy`}
-        subtitle={`Join thousands of young Africans learning high-income digital skills and earning through our 50% commission affiliate program`}
-        buttonText={`Start Learning Today`}
-        pictureUrl={`https://marblism-dashboard-api--production-public.s3.us-west-1.amazonaws.com/gDTGyB-skillaff-wHLz`}
-        socialProof={
-          <LandingSocialRating
-            numberOfUsers={1000}
-            suffixText={`successful learners`}
+    <ErrorBoundary>
+      <PageLayout isLoading={isLoading}>
+        <LandingContainer navItems={navItems}>
+          <LandingHero
+            title={`Transform Your Skills into Income in the Digital Economy`}
+            subtitle={`Join thousands of young Africans learning high-income digital skills and earning through our 50% commission affiliate program`}
+            buttonText={`Start Learning Today`}
+            pictureUrl={`https://marblism-dashboard-api--production-public.s3.us-west-1.amazonaws.com/gDTGyB-skillaff-wHLz`}
+            socialProof={
+              <LandingSocialRating
+                numberOfUsers={1000}
+                suffixText={`successful learners`}
+              />
+            }
           />
-        }
-      />
-      <LandingSocialProof title={`Featured on`} />
-      <LandingPainPoints
-        title={`77% of young Africans want to learn new skills but don't know where to start`}
-        painPoints={painPoints}
-      />
-      <LandingHowItWorks
-        title={`Your Journey to Digital Income`}
-        steps={steps}
-      />
-      <LandingFeatures
-        id="features"
-        title={`Everything You Need to Succeed in the Digital Economy`}
-        subtitle={`Built specifically for ambitious young Africans looking to generate income through digital skills`}
-        features={features}
-      />
-      <LandingTestimonials
-        title={`Join Thousands Already Building Their Digital Future`}
-        subtitle={`See how SkillFlow is helping young Africans transform their lives through digital skills`}
-        testimonials={testimonials}
-      />
-      <LandingPricing
-        id="pricing"
-        title={`Affordable Investment in Your Future`}
-        subtitle={`Choose the plan that matches your goals`}
-        packages={packages}
-      />
-      <LandingFAQ
-        id="faq"
-        title={`Common Questions`}
-        subtitle={`Everything you need to know about getting started`}
-        questionAnswers={questionAnswers}
-      />
-      <LandingCTA
-        title={`Start Your Digital Success Journey Today`}
-        subtitle={`Join 1000+ learners already building their future with SkillFlow`}
-        buttonText={`Get Started Now`}
-        buttonLink={`/register`}
-      />
-    </LandingContainer>
+          <LandingSocialProof title={`Featured on`} />
+          <LandingPainPoints
+            title={`77% of young Africans want to learn new skills but don't know where to start`}
+            painPoints={painPoints}
+          />
+          <LandingHowItWorks
+            title={`Your Journey to Digital Income`}
+            steps={steps}
+          />
+          <LandingFeatures
+            id="features"
+            title={`Everything You Need to Succeed in the Digital Economy`}
+            subtitle={`Built specifically for ambitious young Africans looking to generate income through digital skills`}
+            features={features}
+          />
+          <LandingTestimonials
+            title={`Join Thousands Already Building Their Digital Future`}
+            subtitle={`See how SkillFlow is helping young Africans transform their lives through digital skills`}
+            testimonials={testimonials}
+          />
+          <LandingPricing
+            id="pricing"
+            title={`Affordable Investment in Your Future`}
+            subtitle={`Choose the plan that matches your goals`}
+            packages={packages}
+          />
+          <LandingFAQ
+            id="faq"
+            title={`Common Questions`}
+            subtitle={`Everything you need to know about getting started`}
+            questionAnswers={questionAnswers}
+          />
+          <LandingCTA
+            title={`Start Your Digital Success Journey Today`}
+            subtitle={`Join 1000+ learners already building their future with SkillFlow`}
+            buttonText={`Get Started Now`}
+            buttonLink={`/register`}
+          />
+        </LandingContainer>
+      </PageLayout>
+    </ErrorBoundary>
   )
 }
