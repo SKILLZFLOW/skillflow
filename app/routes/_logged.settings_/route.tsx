@@ -1,6 +1,7 @@
 import { useUserContext } from '@/core/context'
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
+import { YoutubeFilled, FacebookFilled, TikTokOutlined } from '@ant-design/icons'
 import {
   Button,
   Card,
@@ -68,6 +69,11 @@ export default function SettingsPage() {
 
   const handleConnectSocial = async (platform: string) => {
     try {
+      if (platform === 'YouTube') {
+        window.location.href = '/api/auth/youtube'
+        return
+      }
+
       if (user?.id) {
         await createSocialAccount({
           data: {
@@ -152,7 +158,7 @@ export default function SettingsPage() {
               <div
                 style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
               >
-                {['TikTok', 'Facebook'].map(platform => {
+                {['TikTok', 'Facebook', 'YouTube'].map(platform => {
                   const isConnected = userData?.socialAccounts?.some(
                     account => account.platform === platform,
                   )
@@ -169,8 +175,14 @@ export default function SettingsPage() {
                         alignItems: 'center',
                       }}
                     >
-                      <Text>
-                        <i className={`lab la-${platform.toLowerCase()}`}></i>{' '}
+                      <Text style={{ display: 'flex', alignItems: 'center' }}>
+                        {platform === 'YouTube' ? (
+                          <YoutubeFilled style={{ fontSize: '16px', color: '#FF0000', marginRight: '5px' }} />
+                        ) : platform === 'TikTok' ? (
+                          <TikTokOutlined style={{ fontSize: '16px', color: '#000000', marginRight: '5px' }} />
+                        ) : (
+                          <FacebookFilled style={{ fontSize: '16px', color: '#1877F2', marginRight: '5px' }} />
+                        )}
                         {platform}
                       </Text>
                       {isConnected && account ? (

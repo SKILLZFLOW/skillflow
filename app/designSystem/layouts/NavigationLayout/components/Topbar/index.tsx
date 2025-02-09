@@ -59,7 +59,7 @@ export const Topbar: React.FC<Props> = ({ keySelected, items }) => {
             <Avatar
               src={user.pictureUrl}
               alt={user.name}
-              size="default"
+              size={40}
               onClick={() => router('/profile')}
               style={{ cursor: 'pointer' }}
             >

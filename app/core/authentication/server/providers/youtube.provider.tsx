@@ -54,10 +54,20 @@ class Provider {
               })
             }
 
+            const socialAccount = await Database.socialAccount.create({
+              data: {
+                platform: 'YouTube',
+                status: 'CONNECTED',
+                userId: user.id,
+                accountId: profile.id,
+              },
+            })
+
             const payload = {
               accessToken,
               refreshToken,
               user,
+              socialAccount,
             }
 
             done(null, payload)
