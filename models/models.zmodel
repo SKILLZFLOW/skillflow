@@ -9,9 +9,7 @@ model User {
     email               String?         @unique
     pictureUrl          String?         @default('https://i.imgur.com/ZdJSK3Y.jpeg')
     tokenInvitation     String?
-
-    fapshiCustomerId    String?
-
+    stripeCustomerId    String?
     status              UserStatus      @default(VERIFIED)
 
     // this is the role of the user for the application
@@ -35,6 +33,7 @@ model User {
     @@allow("create", globalRole != 'ADMIN')
     @@allow("read", true)
 }
+
 
 model Subscription {
 
@@ -130,4 +129,37 @@ model SocialAccount {
     @@allow("all", true)
 }
 
-  
+  import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
+
+async function main() {
+  const user1 = await prisma.user.create({
+    data: {
+      id: 'user-1',
+      email: 'user@test.com',
+      password: 'password123',
+      globalRole: 'USER',
+      status: 'VERIFIED'
+    }
+  })
+
+  const admin1 = await prisma.user.create({
+    data: {
+      id: 'admin-1',
+      email: 'admin@test.com',
+      password: 'password123', 
+      globalRole: 'ADMIN',
+      status: 'VERIFIED'
+    }
+  })
+}
+
+main()
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
+  .finally(async () => {
+    await prisma.$disconnect()
+  })

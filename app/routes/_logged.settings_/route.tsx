@@ -39,7 +39,10 @@ export default function SettingsPage() {
 
   const handleClickLogout = async () => {
     try {
-      await logout()
+      const response = await logout()
+      if (response.redirect) {
+        window.location.href = response.redirect
+      }
     } catch (error) {
       message.error('Failed to logout')
     }

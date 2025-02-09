@@ -1,11 +1,9 @@
-import { Typography, Card, Row, Col, Button, Spin, message } from 'antd'
-const { Title, Text } = Typography
 import { useUserContext } from '@/core/context'
-import dayjs from 'dayjs'
-import { useLocation, useNavigate, useParams } from '@remix-run/react'
-import { useUploadPublic } from '@/plugins/upload/client'
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
+import { useNavigate } from '@remix-run/react'
+import { Button, Card, Col, Row, Spin, Typography, message } from 'antd'
+const { Title, Text } = Typography
 
 export default function CoursesPage() {
   const navigate = useNavigate()
@@ -18,7 +16,7 @@ export default function CoursesPage() {
   const isPremiumUser = subscription?.status === 'active'
 
   const handleUpgrade = () => {
-    navigate('/upgrade')
+    navigate('/courses')
   }
 
   const handleWatchCourse = async (course: any) => {

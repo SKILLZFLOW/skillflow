@@ -1,4 +1,4 @@
-import { User } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 import { ActionFunction, json } from '@remix-run/node'
 import { AuthenticationServer } from '~/core/authentication/server'
 import { Utility } from '~/core/helpers/utility'
@@ -32,7 +32,7 @@ export const webhookStripeAction: ActionFunction = async ({ request }) => {
 
     const { userId, stripeCustomerId } = data
 
-    let user: User
+    let user: Prisma.UserGetPayload<{}>
 
     if (userId && stripeCustomerId) {
       user = await ctx.databaseUnprotected.user.findFirstOrThrow({

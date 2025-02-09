@@ -1,4 +1,6 @@
-import { Link, useLocation, useNavigate, useParams } from '@remix-run/react'
+import { useUserContext } from '@/core/context'
+import { Api } from '@/core/trpc'
+import { useLocation, useNavigate, useParams } from '@remix-run/react'
 import { Flex } from 'antd'
 import { ReactNode } from 'react'
 import { Leftbar } from './components/Leftbar'
@@ -15,24 +17,32 @@ export const NavigationLayout: React.FC<Props> = ({ children }) => {
   const pathname = useLocation().pathname
   const params: Record<string, string> = useParams()
 
+  const { checkRole } = useUserContext()
+  const { mutateAsync: logout } = Api.authentication.logout.useMutation({
+    onSuccess: data => {
+      if (data.redirect) {
+        window.location.href = data.redirect
+      }
+    },
+  })
+
   const goTo = (url: string) => {
     router(url)
   }
 
   const items: NavigationItem[] = [
     {
-      key: '/home',
-      label: 'Welcome Page',
-      position: 'topbar',
-
-      onClick: () => goTo('/home'),
+      key: '/admin/control-panel',
+      label: 'Control Panel',
+      position: 'leftbar',
+      icon: <i className="las la-cogs"></i>,
+      onClick: () => goTo('/admin/control-panel'),
+      isVisible: checkRole('ADMIN'),
     },
-
     {
       key: '/courses',
       label: 'Courses',
       position: 'topbar',
-
       onClick: () => goTo('/courses'),
     },
 
@@ -56,25 +66,13 @@ export const NavigationLayout: React.FC<Props> = ({ children }) => {
       key: '/settings',
       label: 'Settings',
       position: 'topbar',
-
       onClick: () => goTo('/settings'),
     },
-
     {
-      key: '/upgrade',
-      label: 'Upgrade',
+      key: '/logout',
+      label: 'Logout',
       position: 'topbar',
-
-      onClick: () => goTo('/upgrade'),
-    },
-
-    {
-      key: '/pricing',
-      label: 'Pricing',
-
-      position: 'topbar',
-
-      onClick: () => goTo('/pricing'),
+      onClick: () => logout(),
     },
   ]
 
