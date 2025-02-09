@@ -1,7 +1,7 @@
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
 import { Typography } from 'antd'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 
 const { Paragraph, Title } = Typography
 
@@ -16,8 +16,6 @@ const isTiktokUrl = (url: string) => {
 export default function SkillFeedPage() {
   const { data: videos } = Api.skillFeedVideo.findMany.useQuery()
 
-  const videoRef = useRef<HTMLDivElement>(null)
-
   useEffect(() => {
     const loadTikTokScript = () => {
       const script = document.createElement('script')
@@ -29,27 +27,13 @@ export default function SkillFeedPage() {
     loadTikTokScript()
   }, [])
 
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-          entry.target.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        }
-      });
-    }, { threshold: 0.5 });
-    
-    const videos = document.querySelectorAll('.video-container')
-    videos.forEach(video => observer.observe(video));
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <PageLayout layout="full-width">
-      <div className="flex flex-col scroll-smooth snap-y snap-mandatory">
+      <div className="flex flex-col scroll-smooth snap-y snap-mandatory h-[90vh] overflow-y-scroll">
         {videos?.map(video => (
           <div
             key={video.id}
-            className="w-full h-[90vh] flex flex-col justify-center video-container mb-[15px]"
+            className="w-full h-[90vh] flex flex-col justify-center video-container snap-start snap-always"
           >
             {isYoutubeUrl(video.link) ? (
               <iframe
