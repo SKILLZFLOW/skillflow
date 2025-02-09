@@ -1,15 +1,39 @@
 import { User } from '@prisma/client'
-import {
-  Payment,
-  Product,
-  StripeWebhookResponse,
-  Subscription,
-} from './payment.type'
+import { Payment, Product, Subscription, WebhookResponse } from './payment.type'
 import { Provider } from './providers/provider'
-import { StripeProvider } from './providers/stripe/stripe.provider'
+
+class PlaceholderProvider implements Provider {
+  isActive(): boolean {
+    return true
+  }
+
+  async createCustomer(): Promise<string> {
+    throw new Error('Payment provider not implemented')
+  }
+
+  async createPaymentLink(): Promise<string> {
+    throw new Error('Payment provider not implemented')
+  }
+
+  async findManySubscriptions(): Promise<Subscription[]> {
+    return []
+  }
+
+  async findManyPayments(): Promise<Payment[]> {
+    return []
+  }
+
+  async findManyProducts(): Promise<Product[]> {
+    return []
+  }
+
+  async onPayment(): Promise<WebhookResponse> {
+    throw new Error('Payment provider not implemented')
+  }
+}
 
 class Service {
-  private provider: Provider = new StripeProvider()
+  private provider: Provider = new PlaceholderProvider()
 
   isActive(): boolean {
     if (this.provider) {
@@ -19,8 +43,8 @@ class Service {
     return false
   }
 
-  getCustomerId(user: User): string {
-    return user.stripeCustomerId
+  getCustomerId(user: User): string | null {
+    return null
   }
 
   async findManyProducts(): Promise<Product[]> {
@@ -51,7 +75,7 @@ class Service {
     return this.provider.createPaymentLink(optionsPayment)
   }
 
-  async onPayment(body: Buffer, sig: string): Promise<StripeWebhookResponse> {
+  async onPayment(body: Buffer, sig: string): Promise<WebhookResponse> {
     return this.provider.onPayment(body, sig)
   }
 

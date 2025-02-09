@@ -9,7 +9,6 @@ model User {
     email               String?         @unique
     pictureUrl          String?         @default('https://i.imgur.com/ZdJSK3Y.jpeg')
     tokenInvitation     String?
-    stripeCustomerId    String?
     status              UserStatus      @default(VERIFIED)
 
     // this is the role of the user for the application

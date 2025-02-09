@@ -64,7 +64,7 @@ export default function UsersTab() {
       render: (status: string, record: any) => (
         <Select
           value={status}
-          onChange={(value) => handleStatusChange(record.id, value)}
+          onChange={(value: 'INVITED' | 'VERIFIED') => handleStatusChange(record.id, value)}
           style={{ width: 120 }}
         >
           <Select.Option value="INVITED">Invited</Select.Option>
