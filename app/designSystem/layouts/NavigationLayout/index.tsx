@@ -1,5 +1,6 @@
 import { useUserContext } from '@/core/context'
 import { Api } from '@/core/trpc'
+import { HomeOutlined, LogoutOutlined, PlayCircleOutlined, SettingOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
 import { useLocation, useNavigate, useParams } from '@remix-run/react'
 import { Flex } from 'antd'
 import { ReactNode } from 'react'
@@ -43,13 +44,14 @@ export const NavigationLayout: React.FC<Props> = ({ children }) => {
       key: '/skillfeed',
       label: 'Skill Feed',
       position: 'topbar',
-      icon: <i className="las la-play-circle"></i>,
+      icon: <PlayCircleOutlined />,
       onClick: () => goTo('/skillfeed'),
     },
     {
       key: '/courses',
       label: 'Courses',
       position: 'topbar',
+      icon: <HomeOutlined />,
       onClick: () => goTo('/courses'),
     },
 
@@ -57,7 +59,7 @@ export const NavigationLayout: React.FC<Props> = ({ children }) => {
       key: '/wallet',
       label: 'Wallet',
       position: 'topbar',
-
+      icon: <UserOutlined />,
       onClick: () => goTo('/wallet'),
     },
 
@@ -65,7 +67,7 @@ export const NavigationLayout: React.FC<Props> = ({ children }) => {
       key: '/affiliate',
       label: 'Affiliate',
       position: 'topbar',
-
+      icon: <TeamOutlined />,
       onClick: () => goTo('/affiliate'),
     },
 
@@ -73,12 +75,14 @@ export const NavigationLayout: React.FC<Props> = ({ children }) => {
       key: '/settings',
       label: 'Settings',
       position: 'topbar',
+      icon: <SettingOutlined />,
       onClick: () => goTo('/settings'),
     },
     {
       key: '/logout',
       label: 'Logout',
       position: 'topbar',
+      icon: <LogoutOutlined />,
       onClick: () => logout(),
     },
   ]

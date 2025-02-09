@@ -1,23 +1,21 @@
-import {
-  Typography,
-  Card,
-  Button,
-  Table,
-  InputNumber,
-  Modal,
-  message,
-  Row,
-  Col,
-  Statistic,
-} from 'antd'
-import { useState } from 'react'
-const { Title, Text } = Typography
 import { useUserContext } from '@/core/context'
-import dayjs from 'dayjs'
-import { useLocation, useNavigate, useParams } from '@remix-run/react'
-import { useUploadPublic } from '@/plugins/upload/client'
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
+import {
+  Button,
+  Card,
+  Col,
+  InputNumber,
+  message,
+  Modal,
+  Row,
+  Statistic,
+  Table,
+  Typography,
+} from 'antd'
+import dayjs from 'dayjs'
+import { useState } from 'react'
+const { Title, Text } = Typography
 
 export default function WalletPage() {
   const { user } = useUserContext()
@@ -164,6 +162,7 @@ export default function WalletPage() {
             columns={transactionColumns}
             rowKey="id"
             pagination={{ pageSize: 10 }}
+            scroll={{ x: true }}
           />
         </Card>
 

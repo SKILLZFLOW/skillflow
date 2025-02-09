@@ -122,7 +122,7 @@ export const AuthenticationRouter = Trpc.createRouter({
         return {
           success: true,
           code: 'SUCCESS',
-          redirect: '/home',
+          redirect: '/skillfeed',
         }
       } catch (error) {
         console.error(`Login error for ${input.email}:`, error)
