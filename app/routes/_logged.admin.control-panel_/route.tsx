@@ -4,7 +4,7 @@ import { useNavigate } from '@remix-run/react'
 import { Tabs, Typography } from 'antd'
 import { useEffect } from 'react'
 import UsersTab from './components/UsersTab'
-
+import SkillFeedTab from './components/SkillFeedTab'
 const { Title } = Typography
 
 export default function AdminControlPanel() {
@@ -43,10 +43,11 @@ export default function AdminControlPanel() {
     },
     {
       key: 'skillfeed',
-      label: 'Skillfeed',
+      label: 'Skillfeed', 
       children: (
         <div className="p-4">
           <Title level={3}>Skillfeed Management</Title>
+          <SkillFeedTab />
         </div>
       ),
     },

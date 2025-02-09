@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 const { Title } = Typography
 
-export default function SkillfeedTab() {
+export default function SkillFeedTab() {
   const [isLoading] = useState(false)
 
   const columns = [
@@ -21,7 +21,7 @@ export default function SkillfeedTab() {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-    }
+    },
   ]
 
   const placeholderData = [
@@ -29,8 +29,8 @@ export default function SkillfeedTab() {
       key: '1',
       name: 'Coming Soon',
       category: 'Coming Soon',
-      status: 'Coming Soon'
-    }
+      status: 'Coming Soon',
+    },
   ]
 
   return (
@@ -41,7 +41,8 @@ export default function SkillfeedTab() {
 
       <div className="mb-4">
         <Typography.Text type="secondary">
-          Skillfeed management features are coming soon. This section will allow managing skill-related content.
+          Skillfeed management features are coming soon. This section will allow
+          managing skill-related content.
         </Typography.Text>
       </div>
 

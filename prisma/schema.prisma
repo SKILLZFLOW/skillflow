@@ -28,7 +28,6 @@ model User {
   email               String?         @unique()
   pictureUrl          String?         @default("https://i.imgur.com/ZdJSK3Y.jpeg")
   tokenInvitation     String?
-  fapshiCustomerId    String?
   status              UserStatus      @default(VERIFIED)
   globalRole          String          @default("USER")
   /// @password
@@ -119,4 +118,14 @@ model SocialAccount {
   user      User?    @relation(fields: [userId], references: [id], name: "user")
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt()
+}
+
+/// @@allow('all', true)
+model SkillFeedVideo {
+  id          String   @id() @default(uuid())
+  title       String
+  description String
+  link        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt()
 }

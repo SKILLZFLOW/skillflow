@@ -1,4 +1,4 @@
-import { ConfigProvider, message } from 'antd'
+import { ConfigProvider, theme as antTheme, message } from 'antd'
 import React, {
   ReactNode,
   createContext,
@@ -9,7 +9,6 @@ import React, {
 
 import { MessageInstance } from 'antd/es/message/interface'
 import { ErrorBoundary, MrbHtml } from './core'
-import { theme as antTheme } from 'antd'
 
 export type DesignSystemContext = {
   isMobile: boolean
@@ -20,7 +19,7 @@ export type DesignSystemContext = {
 const DesignSystemContext = createContext<DesignSystemContext>({
   isMobile: false,
   message: null,
-  isLoading: true
+  isLoading: true,
 })
 
 export const useDesignSystem = (): DesignSystemContext => {
@@ -41,7 +40,7 @@ const ProviderGeneral = ({ children }) => {
       colorLink: 'black',
       colorBgBase: 'white',
       colorBgContainer: 'white',
-    }
+    },
   }
 
   useEffect(() => {

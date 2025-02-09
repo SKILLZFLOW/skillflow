@@ -8,6 +8,7 @@ import createWalletRouter from "./Wallet.router";
 import createReferralRouter from "./Referral.router";
 import createTransactionRouter from "./Transaction.router";
 import createSocialAccountRouter from "./SocialAccount.router";
+import createSkillFeedVideoRouter from "./SkillFeedVideo.router";
 import { ClientType as UserClientType } from "./User.router";
 import { ClientType as SubscriptionClientType } from "./Subscription.router";
 import { ClientType as CourseClientType } from "./Course.router";
@@ -15,6 +16,7 @@ import { ClientType as WalletClientType } from "./Wallet.router";
 import { ClientType as ReferralClientType } from "./Referral.router";
 import { ClientType as TransactionClientType } from "./Transaction.router";
 import { ClientType as SocialAccountClientType } from "./SocialAccount.router";
+import { ClientType as SkillFeedVideoClientType } from "./SkillFeedVideo.router";
 
 export type BaseConfig = AnyRootConfig;
 
@@ -46,6 +48,7 @@ export function createRouter<Config extends BaseConfig>(router: RouterFactory<Co
         referral: createReferralRouter(router, procedure),
         transaction: createTransactionRouter(router, procedure),
         socialAccount: createSocialAccountRouter(router, procedure),
+        skillFeedVideo: createSkillFeedVideoRouter(router, procedure),
     }
     );
 }
@@ -58,4 +61,5 @@ export interface ClientType<AppRouter extends AnyRouter> {
     referral: ReferralClientType<AppRouter>;
     transaction: TransactionClientType<AppRouter>;
     socialAccount: SocialAccountClientType<AppRouter>;
+    skillFeedVideo: SkillFeedVideoClientType<AppRouter>;
 }
