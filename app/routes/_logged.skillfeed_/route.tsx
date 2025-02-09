@@ -1,26 +1,67 @@
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
 import { Typography } from 'antd'
+import { useEffect } from 'react'
 
 const { Paragraph, Title } = Typography
+
+const isYoutubeUrl = (url: string) => {
+  return url.includes('youtube.com/watch?v=') || url.includes('youtu.be/')
+}
+
+const isTiktokUrl = (url: string) => {
+  return url.includes('tiktok.com')
+}
 
 export default function SkillFeedPage() {
   const { data: videos } = Api.skillFeedVideo.findMany.useQuery()
 
+  useEffect(() => {
+    const loadTikTokScript = () => {
+      const script = document.createElement('script')
+      script.src = 'https://www.tiktok.com/embed.js'
+      script.async = true
+      document.body.appendChild(script)
+      return () => document.body.removeChild(script)
+    }
+    loadTikTokScript()
+  }, [])
+
   return (
     <PageLayout layout="full-width">
-      <div className="flex flex-col gap-4 p-4">
+      <div className="flex flex-col scroll-smooth snap-y snap-mandatory">
         {videos?.map(video => (
-          <div key={video.id} className="w-full">
-            <iframe
-              src={video.link.replace(
-                'www.youtube.com/watch?v=',
-                'www.youtube.com/embed/',
-              )}
-              className="w-full aspect-video"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+          <div
+            key={video.id}
+            className="w-full h-screen flex flex-col justify-center snap-center"
+          >
+            {isYoutubeUrl(video.link) ? (
+              <iframe
+                src={video.link.replace(
+                  /(youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/,
+                  'youtube.com/embed/$2'
+                )}
+                className="w-full h-[60vh] mx-auto"
+                width="100%"
+                height="100%"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : isTiktokUrl(video.link) ? (
+              <blockquote
+                className="tiktok-embed mx-auto"
+                cite={video.link}
+                data-video-id={video.link.split('/').pop()}
+                data-section="true"
+                style={{ width: '325px', height: '563px' }}
+              >
+                <section></section>
+              </blockquote>
+            ) : (
+              <div className="text-center text-red-500">
+                Unsupported video format
+              </div>
+            )}
             <div className="mt-2">
               <Title level={4}>{video.title}</Title>
               <Paragraph

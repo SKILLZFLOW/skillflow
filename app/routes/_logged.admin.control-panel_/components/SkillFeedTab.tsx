@@ -83,7 +83,7 @@ export default function SkillFeedTab() {
             label="Link"
             rules={[
               { required: true },
-              { pattern: /^(https?:\/\/)?(www\.)?youtube\.com\/watch\?v=[\w-]+$/, message: 'Please enter a valid YouTube URL' }
+              { pattern: /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=[\w-]+|tiktok\.com\/@[\w-]+\/video\/[\d]+)$/, message: 'Please enter a valid YouTube or TikTok URL' }
             ]}
           >
             <Input />
