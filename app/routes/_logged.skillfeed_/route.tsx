@@ -1,7 +1,7 @@
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
 import { Typography } from 'antd'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 const { Paragraph, Title } = Typography
 
@@ -16,6 +16,8 @@ const isTiktokUrl = (url: string) => {
 export default function SkillFeedPage() {
   const { data: videos } = Api.skillFeedVideo.findMany.useQuery()
 
+  const videoRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     const loadTikTokScript = () => {
       const script = document.createElement('script')
@@ -27,13 +29,27 @@ export default function SkillFeedPage() {
     loadTikTokScript()
   }, [])
 
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+          entry.target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      });
+    }, { threshold: 0.5 });
+    
+    const videos = document.querySelectorAll('.video-container')
+    videos.forEach(video => observer.observe(video));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <PageLayout layout="full-width">
       <div className="flex flex-col scroll-smooth snap-y snap-mandatory">
         {videos?.map(video => (
           <div
             key={video.id}
-            className="w-full h-screen flex flex-col justify-center snap-center"
+            className="w-full h-[90vh] flex flex-col justify-center video-container mb-[15px]"
           >
             {isYoutubeUrl(video.link) ? (
               <iframe
@@ -41,7 +57,7 @@ export default function SkillFeedPage() {
                   /(youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/,
                   'youtube.com/embed/$2'
                 )}
-                className="w-full h-[60vh] mx-auto"
+                className="w-full h-[90vh] mx-auto rounded-lg"
                 width="100%"
                 height="100%"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -53,7 +69,7 @@ export default function SkillFeedPage() {
                 cite={video.link}
                 data-video-id={video.link.split('/').pop()}
                 data-section="true"
-                style={{ width: '325px', height: '563px' }}
+                style={{ width: '325px', height: '90vh' }}
               >
                 <section></section>
               </blockquote>
