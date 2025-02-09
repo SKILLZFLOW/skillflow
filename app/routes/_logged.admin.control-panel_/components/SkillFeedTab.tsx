@@ -100,6 +100,7 @@ export default function SkillFeedTab() {
         rowKey="id"
         loading={isLoadingVideos}
         pagination={{ pageSize: 10 }}
+        scroll={{ x: true }}
       />
     </div>
   )

@@ -120,6 +120,7 @@ export default function UsersTab() {
         rowKey="id"
         loading={isLoading}
         pagination={{ pageSize: 10 }}
+        scroll={{ x: true }}
       />
     </div>
   )
