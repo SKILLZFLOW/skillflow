@@ -81,7 +81,10 @@ export default function SkillFeedTab() {
           <Form.Item
             name="link"
             label="Link"
-            rules={[{ required: true, message: 'Please input video link!' }]}
+            rules={[
+              { required: true },
+              { pattern: /^(https?:\/\/)?(www\.)?youtube\.com\/watch\?v=[\w-]+$/, message: 'Please enter a valid YouTube URL' }
+            ]}
           >
             <Input />
           </Form.Item>

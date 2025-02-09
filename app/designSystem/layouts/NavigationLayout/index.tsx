@@ -40,6 +40,13 @@ export const NavigationLayout: React.FC<Props> = ({ children }) => {
       isVisible: checkRole('ADMIN'),
     },
     {
+      key: '/skillfeed',
+      label: 'Skill Feed',
+      position: 'topbar',
+      icon: <i className="las la-play-circle"></i>,
+      onClick: () => goTo('/skillfeed'),
+    },
+    {
       key: '/courses',
       label: 'Courses',
       position: 'topbar',
