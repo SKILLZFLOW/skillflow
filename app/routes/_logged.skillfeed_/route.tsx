@@ -13,7 +13,7 @@ const isTiktokUrl = (url: string) => {
   return url.includes('tiktok.com')
 }
 
-export default function SkillFeedPage() {
+export default function HomePage() {
   const { data: videos } = Api.skillFeedVideo.findMany.useQuery()
 
   useEffect(() => {

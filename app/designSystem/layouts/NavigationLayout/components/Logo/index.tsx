@@ -19,7 +19,7 @@ export const Logo: React.FC<Props> = ({
   }
 
   return (
-    <Flex align="center" gap={10} onClick={() => goTo('/home')}>
+    <Flex align="center" gap={10} onClick={() => goTo('/skillfeed')}>
       <img
         src="https://marblism-dashboard-api--production-public.s3.us-west-1.amazonaws.com/gDTGyB-skillaff-q0fm"
         {...props}

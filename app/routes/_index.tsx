@@ -186,6 +186,7 @@ export default function LandingPage() {
             title={`Transform Your Skills into Income in the Digital Economy`}
             subtitle={`Join thousands of young Africans learning high-income digital skills and earning through our 50% commission affiliate program`}
             buttonText={`Start Learning Today`}
+            buttonLink={`/skillfeed`}
             pictureUrl={`https://marblism-dashboard-api--production-public.s3.us-west-1.amazonaws.com/gDTGyB-skillaff-wHLz`}
             socialProof={
               <LandingSocialRating

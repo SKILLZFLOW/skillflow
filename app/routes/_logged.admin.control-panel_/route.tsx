@@ -14,7 +14,7 @@ export default function AdminControlPanel() {
 
   useEffect(() => {
     if (!checkRole('ADMIN')) {
-      navigate('/home')
+      navigate('/skillfeed')
     }
   }, [checkRole])
 

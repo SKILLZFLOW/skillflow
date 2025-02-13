@@ -1,6 +1,12 @@
 import { useUserContext } from '@/core/context'
 import { Api } from '@/core/trpc'
-import { HomeOutlined, LogoutOutlined, PlayCircleOutlined, SettingOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
+import {
+  HomeOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+  TeamOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
 import { useLocation, useNavigate, useParams } from '@remix-run/react'
 import { Flex } from 'antd'
 import { ReactNode } from 'react'
@@ -44,7 +50,7 @@ export const NavigationLayout: React.FC<Props> = ({ children }) => {
       key: '/skillfeed',
       label: 'Skill Feed',
       position: 'topbar',
-      icon: <PlayCircleOutlined />,
+      icon: <HomeOutlined />,
       onClick: () => goTo('/skillfeed'),
     },
     {
