@@ -12,7 +12,7 @@ model User {
     status              UserStatus      @default(VERIFIED)
 
     // this is the role of the user for the application
-    globalRole          String          @default('USER')
+    globalRole          String          @default('USER') // Keep USER as default but allow PREMIUM and ADMIN
     password            String?         @password @omit
     createdAt           DateTime        @default(now())
     updatedAt           DateTime        @updatedAt @default(now())
@@ -28,6 +28,7 @@ model User {
     @@auth()
     @@allow("all", auth().id == this.id)
     @@allow('all', auth().globalRole == 'ADMIN')
+    @@allow('all', auth().globalRole == 'PREMIUM')
 
     //we only allow that user to register if they don't create an admin role
     @@allow("create", globalRole != 'ADMIN')
@@ -182,4 +183,4 @@ model UserCourse {
     @@allow('all', true)
 }
 
-    
+      

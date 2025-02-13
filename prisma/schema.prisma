@@ -20,6 +20,7 @@ enum UserStatus {
 /// @@auth
 /// @@allow('all', auth().id == this.id)
 /// @@allow('all', auth().globalRole == 'ADMIN')
+/// @@allow('all', auth().globalRole == 'PREMIUM')
 /// @@allow('create', globalRole != 'ADMIN')
 /// @@allow('read', true)
 model User {

@@ -5,7 +5,7 @@ import { ReactNode, createContext, useContext } from 'react'
 /**
  * @provider useUserContext
  * @description A provider to get the relevant user context
- * @attribute {(roleName: string) => boolean} checkRole - Check if the logged user match the globalRole of the user for example ADMIN or USER
+ * @attribute {(roleNames: string | string[]) => boolean} checkRole - Check if the logged user match any of the provided globalRoles
  * @attribute {boolean} isLoggedIn - Wether the user is authenticated or not
  * @attribute {User} user - The user object, user.id to access the id for example
  * @usage  const {user, checkRole} = useUserContext(); // then you can access the id, name, email like that 'const userId = user?.id'
@@ -16,7 +16,7 @@ type AuthenticationStatus = 'unauthenticated' | 'loading' | 'authenticated'
 
 type UserContextType = {
   user: User
-  checkRole: (roleName: string) => boolean
+  checkRole: (roleNames: string | string[]) => boolean
   refetch: () => void
   authenticationStatus: AuthenticationStatus
   isLoggedIn: boolean
@@ -34,8 +34,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const user = session?.user
 
-  const checkRole = (roleName: string) => {
-    return !!(user?.globalRole === roleName)
+  const checkRole = (roleNames: string | string[]) => {
+    if (!user?.globalRole) return false
+    const roles = Array.isArray(roleNames) ? roleNames : [roleNames]
+    return roles.includes(user.globalRole)
   }
 
   const isLoading = querySession.isLoading

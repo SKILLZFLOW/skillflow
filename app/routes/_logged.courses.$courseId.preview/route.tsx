@@ -28,7 +28,7 @@ export default function CoursePreviewPage() {
     }
 
     if (course.isPremium) {
-      if (!checkRole('ADMIN')) {
+      if (!checkRole(['ADMIN', 'PREMIUM'])) {
         message.warning(
           'This is a premium course. Please upgrade your subscription to access.',
         )

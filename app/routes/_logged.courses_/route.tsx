@@ -15,7 +15,7 @@ export default function CoursesPage() {
     where: { userId: user?.id },
   })
 
-  const isPremiumUser = checkRole('ADMIN') || subscription?.status === 'active'
+  const isPremiumUser = checkRole(['ADMIN', 'PREMIUM'])
 
   const handleUpgrade = () => {
     navigate('/courses')
@@ -33,7 +33,7 @@ export default function CoursesPage() {
     }
 
     if (course.isPremium) {
-      if (!checkRole('ADMIN') && subscription?.status !== 'active') {
+      if (!checkRole(['ADMIN', 'PREMIUM'])) {
         message.warning('This is a premium course. Please upgrade your subscription to access.')
         navigate(`/courses/${course.id}/preview`)
         return
