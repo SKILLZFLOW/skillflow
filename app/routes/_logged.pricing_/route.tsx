@@ -28,7 +28,7 @@ export default function PricingPage() {
     }
 
     const mapping = {
-      usd: '${{price}}',
+      xaf: 'XAF {{price}}',
     }
 
     const pattern = mapping[product.currency]

@@ -19,7 +19,7 @@ export default function SalesTab() {
       title: 'Amount',
       dataIndex: 'amount',
       key: 'amount',
-      render: (amount: string) => `$${amount}`,
+      render: (amount: string) => `XAF ${amount}`,
     },
     {
       title: 'Type',
@@ -67,7 +67,7 @@ export default function SalesTab() {
             <Statistic
               title="Total Sales"
               value={totalSales}
-              prefix="$"
+              prefix="XAF"
               precision={2}
             />
           </Col>
@@ -81,7 +81,7 @@ export default function SalesTab() {
             <Statistic
               title="Average Transaction"
               value={transactions?.length ? (totalSales / transactions.length) : 0}
-              prefix="$"
+              prefix="XAF"
               precision={2}
             />
           </Col>

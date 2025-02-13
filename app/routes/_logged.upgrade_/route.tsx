@@ -96,7 +96,7 @@ export default function UpgradePage() {
                 >
                   <div style={{ textAlign: 'center', marginBottom: 24 }}>
                     <Title level={2} style={{ margin: 0 }}>
-                      ${product.price.toString()}
+                      XAF {product.price.toString()}
                     </Title>
                     <Text type="secondary">{product.interval}</Text>
                   </div>
@@ -109,12 +109,18 @@ export default function UpgradePage() {
                       size="large"
                       block
                       onClick={() => handleUpgrade(product.id)}
-                      icon={<img src="/fapshi-icon.png" alt="Fapshi" style={{height: '16px', marginRight: '8px'}}/>}
+                      icon={
+                        <img
+                          src="/fapshi-icon.png"
+                          alt="Fapshi"
+                          style={{ height: '16px', marginRight: '8px' }}
+                        />
+                      }
                       style={{
-                        background: '#FF6B00', 
+                        background: '#FF6B00',
                         borderColor: '#FF6B00',
                         boxShadow: '0 2px 0 rgba(255, 107, 0, 0.1)',
-                        fontWeight: 600
+                        fontWeight: 600,
                       }}
                       className="hover:opacity-90 transition-opacity"
                     >

@@ -4,6 +4,7 @@ import { PageLayout } from '@/designSystem'
 import { useNavigate } from '@remix-run/react'
 import { Button, Card, Col, Row, Spin, Typography, message } from 'antd'
 import { ImageOptimizedClient } from '~/plugins/image-optimize/client'
+import { useState } from 'react'
 const { Title, Text } = Typography
 
 export default function CoursesPage() {
@@ -20,22 +21,47 @@ export default function CoursesPage() {
     navigate('/courses')
   }
 
+  const [isEnrolling, setIsEnrolling] = useState(false)
+
+  const { mutateAsync: createEnrollment } = Api.userCourse.create.useMutation()
+
   const handleJoinCourse = async (course: any) => {
     if (!isLoggedIn) {
       message.warning('Please login to join courses')
+      navigate('/login')
       return
     }
 
-    if (course.isPremium && !isPremiumUser) {
-      navigate(`/courses/${course.id}/preview`)
-      return
+    if (course.isPremium) {
+      if (!checkRole('ADMIN') && subscription?.status !== 'active') {
+        message.warning('This is a premium course. Please upgrade your subscription to access.')
+        navigate(`/courses/${course.id}/preview`)
+        return
+      }
     }
 
+    setIsEnrolling(true)
     try {
-      await Api.course.enroll.mutate({ courseId: course.id })
+      await createEnrollment({ 
+        data: {
+          courseId: course.id,
+          userId: user.id 
+        }
+      })
+      message.success('Successfully enrolled in course')
       navigate(`/courses/${course.id}`)
-    } catch (error) {
-      message.error('Failed to join course')
+    } catch (error: any) {
+      if (error.code === 'NOT_FOUND') {
+        message.error('Course not found')
+      } else if (error.code === 'CONFLICT') {
+        message.error('You are already enrolled in this course')
+      } else if (error.code === 'FORBIDDEN') {
+        message.error('Premium subscription required for course enrollment')
+      } else {
+        message.error('Failed to join course. Please try again.')
+      }
+    } finally {
+      setIsEnrolling(false)
     }
   }
 
@@ -134,6 +160,7 @@ export default function CoursesPage() {
                     type="primary"
                     block
                     onClick={() => handleJoinCourse(course)}
+                    loading={isEnrolling}
                   >
                     Join Course
                   </Button>,

@@ -18,12 +18,12 @@ export default function CourseDetailsPage() {
   const { data: enrollment, isLoading: isEnrollmentLoading } = Api.userCourse.findFirst.useQuery({
     where: { courseId, userId: user.id }
   })
-  const { data: course, isLoading: isCourseLoading } = Api.course.findUnique.useQuery({
+  const { data: course, isLoading, isLoading: isCourseLoading } = Api.course.findUnique.useQuery({
     where: { id: courseId },
     include: { sections: { include: { videos: true } } },
   })
 
-  if (isLoading || isCourseLoading || isEnrollmentLoading) {
+  if (isLoading || isEnrollmentLoading) {
     return (
       <PageLayout layout="full-width">
         <div style={{ textAlign: 'center', padding: '50px' }}>
@@ -115,7 +115,7 @@ export default function CourseDetailsPage() {
         onOk={async () => {
           setIsDropLoading(true)
           try {
-            await dropCourse({ where: { courseId, userId: user.id } })
+            await dropCourse({ where: { id: enrollment?.id } })
             message.success('Course dropped successfully')
             navigate('/my-courses')
           } catch (error) {

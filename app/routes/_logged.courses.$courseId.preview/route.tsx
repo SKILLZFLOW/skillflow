@@ -1,17 +1,66 @@
+import { useUserContext } from '@/core/context'
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
-import { useParams } from '@remix-run/react'
-import { Button, Card, List, Spin, Typography } from 'antd'
+import { useNavigate, useParams } from '@remix-run/react'
+import { Button, Card, List, Spin, Typography, message } from 'antd'
+import { useState } from 'react'
 import { ImageOptimizedClient } from '~/plugins/image-optimize/client'
 
 const { Title, Text } = Typography
 
 export default function CoursePreviewPage() {
+  const navigate = useNavigate()
+  const { user, isLoggedIn, checkRole } = useUserContext()
+  const [isEnrolling, setIsEnrolling] = useState(false)
+  const { mutateAsync: createEnrollment } = Api.userCourse.create.useMutation()
+
   const { courseId } = useParams()
   const { data: course, isLoading } = Api.course.findUnique.useQuery({
     where: { id: courseId },
     include: { sections: { include: { videos: true } } },
   })
+
+  const handleJoinCourse = async (course: any) => {
+    if (!isLoggedIn) {
+      message.warning('Please login to join courses')
+      navigate('/login')
+      return
+    }
+
+    if (course.isPremium) {
+      if (!checkRole('ADMIN')) {
+        message.warning(
+          'This is a premium course. Please upgrade your subscription to access.',
+        )
+        navigate('/upgrade')
+        return
+      }
+    }
+
+    setIsEnrolling(true)
+    try {
+      await createEnrollment({
+        data: {
+          courseId: course.id,
+          userId: user.id,
+        },
+      })
+      message.success('Successfully enrolled in course')
+      navigate(`/courses/${course.id}`)
+    } catch (error: any) {
+      if (error.code === 'NOT_FOUND') {
+        message.error('Course not found')
+      } else if (error.code === 'CONFLICT') {
+        message.error('You are already enrolled in this course')
+      } else if (error.code === 'FORBIDDEN') {
+        message.error('Premium subscription required for course enrollment')
+      } else {
+        message.error('Failed to join course. Please try again.')
+      }
+    } finally {
+      setIsEnrolling(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -47,6 +96,17 @@ export default function CoursePreviewPage() {
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
         <Title level={2}>{course?.title}</Title>
         <Text>{course?.description}</Text>
+
+        <div className="flex items-center gap-4 mt-4">
+          <Text strong>XAF {course?.price}</Text>
+          <Button
+            type="primary"
+            onClick={() => handleJoinCourse(course)}
+            loading={isEnrolling}
+          >
+            GET NOW
+          </Button>
+        </div>
 
         <List
           className="mt-8"

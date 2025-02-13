@@ -4,8 +4,6 @@ import {
   HomeOutlined,
   LogoutOutlined,
   SettingOutlined,
-  TeamOutlined,
-  UserOutlined,
 } from '@ant-design/icons'
 import { useLocation, useNavigate, useParams } from '@remix-run/react'
 import { Flex } from 'antd'
@@ -67,22 +65,6 @@ export const NavigationLayout: React.FC<Props> = ({ children }) => {
       icon: <i className="las la-graduation-cap"></i>,
       onClick: () => goTo('/my-courses'),
     },
-    {
-      key: '/wallet',
-      label: 'Wallet',
-      position: 'topbar',
-      icon: <UserOutlined />,
-      onClick: () => goTo('/wallet'),
-    },
-
-    {
-      key: '/affiliate',
-      label: 'Affiliate',
-      position: 'topbar',
-      icon: <TeamOutlined />,
-      onClick: () => goTo('/affiliate'),
-    },
-
     {
       key: '/settings',
       label: 'Settings',
