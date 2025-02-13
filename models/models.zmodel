@@ -183,4 +183,13 @@ model UserCourse {
     @@allow('all', true)
 }
 
+model PremiumLink {
+    id        String   @id @default(uuid())
+    url       String   @unique
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@allow('all', auth().globalRole == 'ADMIN')
+}
+
       

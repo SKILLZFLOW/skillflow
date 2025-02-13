@@ -98,6 +98,7 @@ export default function CourseEditPage() {
         data: {
           ...values,
           previewUrl,
+          paymentLink: values.paymentLink,
         },
       })
       message.success('Course updated successfully')
@@ -242,6 +243,10 @@ export default function CourseEditPage() {
 
           <Form.Item name="price" label="Price" rules={[{ required: true }]} className="w-full">
             <Input className="w-full" />
+          </Form.Item>
+
+          <Form.Item name="paymentLink" label="Payment Link" className="w-full">
+            <Input className="w-full" placeholder="Enter payment URL" />
           </Form.Item>
 
           <Button type="primary" htmlType="submit">

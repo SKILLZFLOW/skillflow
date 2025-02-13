@@ -10,56 +10,26 @@ const { Title, Text } = Typography
 
 export default function CoursePreviewPage() {
   const navigate = useNavigate()
-  const { user, isLoggedIn, checkRole } = useUserContext()
-  const [isEnrolling, setIsEnrolling] = useState(false)
-  const { mutateAsync: createEnrollment } = Api.userCourse.create.useMutation()
-
+  const { isLoggedIn } = useUserContext()
   const { courseId } = useParams()
   const { data: course, isLoading } = Api.course.findUnique.useQuery({
     where: { id: courseId },
     include: { sections: { include: { videos: true } } },
   })
 
-  const handleJoinCourse = async (course: any) => {
+  const handleGetNow = async (course: any) => {
     if (!isLoggedIn) {
       message.warning('Please login to join courses')
       navigate('/login')
       return
     }
 
-    if (course.isPremium) {
-      if (!checkRole(['ADMIN', 'PREMIUM'])) {
-        message.warning(
-          'This is a premium course. Please upgrade your subscription to access.',
-        )
-        navigate('/upgrade')
-        return
-      }
+    if (!course.paymentLink) {
+      message.warning('Payment link not available')
+      return
     }
 
-    setIsEnrolling(true)
-    try {
-      await createEnrollment({
-        data: {
-          courseId: course.id,
-          userId: user.id,
-        },
-      })
-      message.success('Successfully enrolled in course')
-      navigate(`/courses/${course.id}`)
-    } catch (error: any) {
-      if (error.code === 'NOT_FOUND') {
-        message.error('Course not found')
-      } else if (error.code === 'CONFLICT') {
-        message.error('You are already enrolled in this course')
-      } else if (error.code === 'FORBIDDEN') {
-        message.error('Premium subscription required for course enrollment')
-      } else {
-        message.error('Failed to join course. Please try again.')
-      }
-    } finally {
-      setIsEnrolling(false)
-    }
+    window.location.href = course.paymentLink
   }
 
   if (isLoading) {
@@ -101,8 +71,7 @@ export default function CoursePreviewPage() {
           <Text strong>XAF {course?.price}</Text>
           <Button
             type="primary"
-            onClick={() => handleJoinCourse(course)}
-            loading={isEnrolling}
+            onClick={() => handleGetNow(course)}
           >
             GET NOW
           </Button>
@@ -142,7 +111,11 @@ export default function CoursePreviewPage() {
             content.
           </Text>
           <div style={{ marginTop: '16px' }}>
-            <Button type="primary" size="large" href="/upgrade">
+            <Button 
+              type="primary" 
+              size="large" 
+              onClick={() => handleGetNow(course)}
+            >
               Upgrade Now
             </Button>
           </div>
