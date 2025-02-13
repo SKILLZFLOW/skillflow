@@ -67,6 +67,7 @@ export default function CourseEditPage() {
   const { mutateAsync: createSection } = Api.section.create.useMutation()
   const { mutateAsync: createVideo } = Api.video.create.useMutation()
   const { mutateAsync: updateVideo } = Api.video.update.useMutation()
+  const { mutateAsync: deleteVideo } = Api.video.delete.useMutation()
 
   const handleCourseSubmit = async (values: any) => {
     try {
@@ -105,11 +106,12 @@ export default function CourseEditPage() {
 
   const handleDeleteVideo = async (videoId: string) => {
     try {
-      await Api.video.delete.mutate({ where: { id: videoId } });
+      await deleteVideo({ where: { id: videoId } });
       message.success('Video deleted successfully');
       refetch();
     } catch (error) {
-      message.error('Failed to delete video');
+      console.error('Delete video error:', error);
+      message.error(`Failed to delete video: ${error.message}`);
     }
   };
 
