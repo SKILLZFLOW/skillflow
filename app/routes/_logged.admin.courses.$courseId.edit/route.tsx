@@ -85,26 +85,40 @@ export default function CourseEditPage() {
   const { mutateAsync: deleteVideo } = Api.video.delete.useMutation()
   const { mutateAsync: deleteSection } = Api.section.delete.useMutation()
 
-  const handleCourseSubmit = async (values: any) => {
+  const handleCourseSubmit = async (values: Prisma.CourseUpdateInput) => {
     try {
-      let previewUrl = values.previewUrl
+      let previewUrl = course.previewUrl
       if (fileList.length > 0 && fileList[0] instanceof File) {
-        const { url } = await upload({ file: fileList[0] as RcFile })
-        previewUrl = url
+        try {
+          const { url } = await upload({ file: fileList[0] as RcFile })
+          previewUrl = url
+        } catch (error) {
+          console.error('Image upload error:', error)
+          message.error('Failed to upload image: ' + error.message)
+          return
+        }
       }
+
+      const { paymentLink, ...rest } = values
+      const updateData: Prisma.CourseUpdateInput = {
+        ...rest,
+        previewUrl,
+        paymentLink: paymentLink || null
+      }
+
+      console.log('Updating course with data:', updateData)
 
       await updateCourse({
         where: { id: courseId },
-        data: {
-          ...values,
-          previewUrl,
-          paymentLink: values.paymentLink,
-        },
+        data: updateData
       })
+      
       message.success('Course updated successfully')
       refetch()
     } catch (error) {
-      message.error('Failed to update course')
+      console.error('Course update error:', error)
+      message.error(`Failed to update course: ${error.message}`)
+      message.error('Please check the form values and try again')
     }
   }
 

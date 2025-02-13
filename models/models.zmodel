@@ -61,11 +61,13 @@ model Course {
     contentUrl    String?
     isPremium     Boolean
     price         String?
+    paymentLink   String?
     sections      Section[]
     enrolledUsers UserCourse[]
 
     createdAt     DateTime     @default(now())
     updatedAt     DateTime     @updatedAt @default(now())
+    @@allow('update', auth().globalRole == 'ADMIN' && has_only('paymentLink'))
     @@allow("all", true)
 }
 
