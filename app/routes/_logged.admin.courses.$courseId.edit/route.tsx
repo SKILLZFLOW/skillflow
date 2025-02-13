@@ -213,7 +213,7 @@ export default function CourseEditPage() {
                       setIsVideoModalVisible(true)
                     }}
                   >
-                    Add PDF Document
+                    Add Video
                   </Button>
                 </div>
 
@@ -262,7 +262,7 @@ export default function CourseEditPage() {
         />
 
         <Modal
-          title="Add PDF Document"
+          title="Add Video"
           open={isVideoModalVisible}
           onCancel={() => setIsVideoModalVisible(false)}
           footer={null}
@@ -313,7 +313,7 @@ export default function CourseEditPage() {
             </Form.Item>
 
             <Button type="primary" htmlType="submit">
-              Add PDF Document
+              Add Video
             </Button>
           </Form>
         </Modal>
