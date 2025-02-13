@@ -17,7 +17,6 @@ import {
   Typography,
   Upload,
 } from 'antd'
-import { RcFile } from 'antd/es/upload'
 import { useState } from 'react'
 
 const { Title } = Typography
@@ -31,6 +30,10 @@ export default function CourseEditPage() {
   const [selectedSectionId, setSelectedSectionId] = useState<string>()
   const [editingVideo, setEditingVideo] = useState<Video | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [sectionToDelete, setSectionToDelete] = useState<string | null>(null)
+  const [showFirstConfirm, setShowFirstConfirm] = useState(false)
+  const [showSecondConfirm, setShowSecondConfirm] = useState(false)
+  const [videoToDelete, setVideoToDelete] = useState<string | null>(null)
 
   useEffect(() => {
     const loadTikTokScript = () => {
@@ -68,6 +71,7 @@ export default function CourseEditPage() {
   const { mutateAsync: createVideo } = Api.video.create.useMutation()
   const { mutateAsync: updateVideo } = Api.video.update.useMutation()
   const { mutateAsync: deleteVideo } = Api.video.delete.useMutation()
+  const { mutateAsync: deleteSection } = Api.section.delete.useMutation()
 
   const handleCourseSubmit = async (values: any) => {
     try {
@@ -115,16 +119,29 @@ export default function CourseEditPage() {
     }
   };
 
+  const handleDeleteSection = async (sectionId: string) => {
+    try {
+      await deleteSection({ where: { id: sectionId } })
+      message.success('Section deleted successfully')
+      refetch()
+    } catch (error) {
+      console.error('Delete section error:', error)
+      message.error(`Failed to delete section: ${error.message}`)
+    } finally {
+      setSectionToDelete(null)
+      setShowFirstConfirm(false)
+      setShowSecondConfirm(false)
+    }
+  }
+
   const handleAddVideo = async (values: Prisma.VideoCreateInput) => {
     setIsSubmitting(true);
     try {
-      let fileUrl = values.file ? (await upload({ file: values.file })).url : undefined;
       const videoData = {
         title: values.title,
         description: values.description,
         embedLink: values.embedLink,
         order: values.order,
-        fileUrl,
         sectionId: selectedSectionId!
       };
       
@@ -227,15 +244,21 @@ export default function CourseEditPage() {
               <div className="w-full">
                 <div className="flex justify-between items-center mb-4">
                   <Title level={4}>{section.title}</Title>
-                  <Button
-                    type="primary"
-                    onClick={() => {
-                      setSelectedSectionId(section.id)
-                      setIsVideoModalVisible(true)
-                    }}
-                  >
-                    Add Video
-                  </Button>
+                  <Space>
+                    <Button
+                      type="primary"
+                      onClick={() => {
+                        setSelectedSectionId(section.id)
+                        setIsVideoModalVisible(true)
+                      }}
+                    >
+                      Add Video
+                    </Button>
+                    <Button danger onClick={() => {
+                      setSectionToDelete(section.id)
+                      setShowFirstConfirm(true)
+                    }}>Delete Section</Button>
+                  </Space>
                 </div>
 
                 <Table 
@@ -243,14 +266,13 @@ export default function CourseEditPage() {
                   columns={[
                     { title: 'Title', dataIndex: 'title' },
                     { title: 'Source', dataIndex: 'embedLink' },
-                    { title: 'File', dataIndex: 'fileUrl' },
                     { title: 'Order', dataIndex: 'order' },
                     { 
                       title: 'Actions',
                       render: (_, video) => (
                         <Space>
                           <Button onClick={() => handleEditVideo(video)}>Edit</Button>
-                          <Button danger onClick={() => handleDeleteVideo(video.id)}>Delete</Button>
+                          <Button danger onClick={() => setVideoToDelete(video.id)}>Delete</Button>
                         </Space>
                       )
                     }
@@ -317,27 +339,50 @@ export default function CourseEditPage() {
               <InputNumber min={1} />
             </Form.Item>
 
-            <Form.Item name="file" label="PDF File">
-              <Upload
-                beforeUpload={(file: RcFile) => {
-                  if (file.type !== 'application/pdf') {
-                    message.error('Only PDF files are allowed')
-                    return false
-                  }
-                  videoForm.setFieldValue('file', file)
-                  return false
-                }}
-                maxCount={1}
-                accept=".pdf"
-              >
-                <Button>Select PDF File</Button>
-              </Upload>
-            </Form.Item>
 
             <Button type="primary" htmlType="submit" loading={isSubmitting}>
               {editingVideo ? 'Update' : 'Add'} Video
             </Button>
           </Form>
+        </Modal>
+
+        <Modal
+          title="Delete Section"
+          open={showFirstConfirm}
+          onOk={() => {
+            setShowFirstConfirm(false)
+            setShowSecondConfirm(true)
+          }}
+          onCancel={() => {
+            setSectionToDelete(null)
+            setShowFirstConfirm(false)
+          }}
+        >
+          <p>Are you sure you want to delete this section? All videos will be deleted.</p>
+        </Modal>
+
+        <Modal
+          title="Final Confirmation"
+          open={showSecondConfirm}
+          onOk={() => handleDeleteSection(sectionToDelete!)}
+          onCancel={() => {
+            setSectionToDelete(null)
+            setShowSecondConfirm(false)
+          }}
+        >
+          <p>This action cannot be undone. Are you absolutely sure?</p>
+        </Modal>
+
+        <Modal
+          title="Delete Video"
+          open={!!videoToDelete}
+          onOk={() => {
+            handleDeleteVideo(videoToDelete!)
+            setVideoToDelete(null)
+          }}
+          onCancel={() => setVideoToDelete(null)}
+        >
+          <p>Are you sure you want to delete this video? This action cannot be undone.</p>
         </Modal>
       </div>
     </PageLayout>
