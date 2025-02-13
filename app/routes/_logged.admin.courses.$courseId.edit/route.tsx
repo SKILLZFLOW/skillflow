@@ -11,7 +11,9 @@ import {
   List,
   message,
   Modal,
+  Space,
   Spin,
+  Table,
   Typography,
   Upload,
 } from 'antd'
@@ -27,6 +29,8 @@ export default function CourseEditPage() {
   const [videoForm] = Form.useForm()
   const [isVideoModalVisible, setIsVideoModalVisible] = useState(false)
   const [selectedSectionId, setSelectedSectionId] = useState<string>()
+  const [editingVideo, setEditingVideo] = useState<Video | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     const loadTikTokScript = () => {
@@ -62,6 +66,7 @@ export default function CourseEditPage() {
   const { mutateAsync: updateCourse } = Api.course.update.useMutation()
   const { mutateAsync: createSection } = Api.section.create.useMutation()
   const { mutateAsync: createVideo } = Api.video.create.useMutation()
+  const { mutateAsync: updateVideo } = Api.video.update.useMutation()
 
   const handleCourseSubmit = async (values: any) => {
     try {
@@ -92,44 +97,58 @@ export default function CourseEditPage() {
     }
   }
 
-  const handleAddVideo = async (values: any) => {
-    try {
-      let documentUrl = ''
-      if (values.file) {
-        try {
-          const result = await upload({ file: values.file })
-          documentUrl = result.url
-        } catch (uploadError) {
-          console.error('Upload error:', uploadError)
-          message.error(
-            `Failed to upload PDF: ${
-              uploadError.message || 'Unknown upload error occurred'
-            }`,
-          )
-          return
-        }
-      }
+  const handleEditVideo = (video: any) => {
+    setEditingVideo(video);
+    videoForm.setFieldsValue(video);
+    setIsVideoModalVisible(true);
+  };
 
-      const { file, ...formData } = values
-      await createVideo({
-        data: {
-          ...formData,
-          documentUrl,
-          documentType: 'pdf',
-          sectionId: selectedSectionId,
-        },
-      })
-      message.success('Video added successfully')
-      setIsVideoModalVisible(false)
-      videoForm.resetFields()
-      refetch()
+  const handleDeleteVideo = async (videoId: string) => {
+    try {
+      await Api.video.delete.mutate({ where: { id: videoId } });
+      message.success('Video deleted successfully');
+      refetch();
     } catch (error) {
-      console.error('Video creation error:', error)
-      message.error(
-        `Failed to add video: ${error.message || 'Unknown error occurred'}`,
-      )
+      message.error('Failed to delete video');
     }
-  }
+  };
+
+  const handleAddVideo = async (values: Prisma.VideoCreateInput) => {
+    setIsSubmitting(true);
+    try {
+      let fileUrl = values.file ? (await upload({ file: values.file })).url : undefined;
+      const videoData = {
+        title: values.title,
+        description: values.description,
+        embedLink: values.embedLink,
+        order: values.order,
+        fileUrl,
+        sectionId: selectedSectionId!
+      };
+      
+      if (editingVideo) {
+        await updateVideo({
+          where: { id: editingVideo.id },
+          data: videoData
+        });
+        message.success('Video updated successfully');
+      } else {
+        await createVideo({
+          data: videoData,
+        });
+        message.success('Video added successfully');
+      }
+      refetch();
+    } catch (error) {
+      console.error('Video save error:', error);
+      message.error(`Failed to save video: ${error.message}`);
+    } finally {
+      setIsVideoModalVisible(false);
+      setEditingVideo(null);
+      videoForm.resetFields();
+      setIsSubmitting(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -217,44 +236,24 @@ export default function CourseEditPage() {
                   </Button>
                 </div>
 
-                <List
+                <Table 
                   dataSource={section.videos}
-                  renderItem={(video: any) => (
-                    <List.Item>
-                      <div>
-                        <div>{video.title}</div>
-                        <div className="text-gray-500">{video.description}</div>
-                        <div className="w-full h-[90vh] flex flex-col justify-center video-container">
-                          {isYoutubeUrl(video.embedLink) ? (
-                            <iframe
-                              src={video.embedLink.replace(
-                                /(youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/,
-                                'youtube.com/embed/$2'
-                              )}
-                              className="w-full h-[90vh] mx-auto rounded-lg"
-                              width="100%"
-                              height="100%"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          ) : isTiktokUrl(video.embedLink) ? (
-                            <blockquote
-                              className="tiktok-embed mx-auto"
-                              cite={video.embedLink}
-                              data-video-id={video.embedLink.split('/').pop()}
-                              style={{ width: '325px', height: '90vh' }}
-                            >
-                              <section></section>
-                            </blockquote>
-                          ) : (
-                            <div className="text-center text-red-500">
-                              Unsupported video format
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </List.Item>
-                  )}
+                  columns={[
+                    { title: 'Title', dataIndex: 'title' },
+                    { title: 'Source', dataIndex: 'embedLink' },
+                    { title: 'File', dataIndex: 'fileUrl' },
+                    { title: 'Order', dataIndex: 'order' },
+                    { 
+                      title: 'Actions',
+                      render: (_, video) => (
+                        <Space>
+                          <Button onClick={() => handleEditVideo(video)}>Edit</Button>
+                          <Button danger onClick={() => handleDeleteVideo(video.id)}>Delete</Button>
+                        </Space>
+                      )
+                    }
+                  ]}
+                  pagination={false}
                 />
               </div>
             </List.Item>
@@ -262,9 +261,13 @@ export default function CourseEditPage() {
         />
 
         <Modal
-          title="Add Video"
+          title={editingVideo ? 'Edit Video' : 'Add Video'}
           open={isVideoModalVisible}
-          onCancel={() => setIsVideoModalVisible(false)}
+          onCancel={() => {
+            setIsVideoModalVisible(false);
+            setEditingVideo(null);
+            videoForm.resetFields();
+          }}
           footer={null}
         >
           <Form form={videoForm} layout="vertical" onFinish={handleAddVideo}>
@@ -312,15 +315,6 @@ export default function CourseEditPage() {
               <InputNumber min={1} />
             </Form.Item>
 
-            <Button type="primary" htmlType="submit">
-              Add Video
-            </Button>
-          </Form>
-        </Modal>
-      </div>
-    </PageLayout>
-  )
-}
             <Form.Item name="file" label="PDF File">
               <Upload
                 beforeUpload={(file: RcFile) => {
@@ -334,6 +328,16 @@ export default function CourseEditPage() {
                 maxCount={1}
                 accept=".pdf"
               >
-                <Button>Select Video File</Button>
+                <Button>Select PDF File</Button>
               </Upload>
             </Form.Item>
+
+            <Button type="primary" htmlType="submit" loading={isSubmitting}>
+              {editingVideo ? 'Update' : 'Add'} Video
+            </Button>
+          </Form>
+        </Modal>
+      </div>
+    </PageLayout>
+  )
+}
