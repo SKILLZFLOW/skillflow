@@ -23,6 +23,7 @@ model User {
     referralsAsReferred Referral[]      @relation("referred")
     transactions        Transaction[]   @relation("user")
     socialAccounts      SocialAccount[] @relation("user")
+    enrolledCourses     UserCourse[]
 
     @@auth()
     @@allow("all", auth().id == this.id)
@@ -52,17 +53,18 @@ model Subscription {
 
 model Course {
 
-    id          String    @id @default(uuid())
-    title       String?
-    description String?
-    previewUrl  String?
-    contentUrl  String?
-    isPremium   Boolean
-    price       String?
-    sections    Section[]
+    id            String       @id @default(uuid())
+    title         String?
+    description   String?
+    previewUrl    String?
+    contentUrl    String?
+    isPremium     Boolean
+    price         String?
+    sections      Section[]
+    enrolledUsers UserCourse[]
 
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @updatedAt @default(now())
+    createdAt     DateTime     @default(now())
+    updatedAt     DateTime     @updatedAt @default(now())
     @@allow("all", true)
 }
 
@@ -168,4 +170,16 @@ model SkillFeedVideo {
     @@allow('all', true)
 }
 
-  
+model UserCourse {
+    id        String   @id @default(uuid())
+    userId    String
+    courseId  String
+    user      User     @relation(fields: [userId], references: [id])
+    course    Course   @relation(fields: [courseId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@allow('all', true)
+}
+
+    

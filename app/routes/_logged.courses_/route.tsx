@@ -3,35 +3,40 @@ import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
 import { useNavigate } from '@remix-run/react'
 import { Button, Card, Col, Row, Spin, Typography, message } from 'antd'
+import { ImageOptimizedClient } from '~/plugins/image-optimize/client'
 const { Title, Text } = Typography
 
 export default function CoursesPage() {
   const navigate = useNavigate()
-  const { user, isLoggedIn } = useUserContext()
+  const { user, isLoggedIn, checkRole } = useUserContext()
   const { data: courses, isLoading } = Api.course.findMany.useQuery({})
   const { data: subscription } = Api.subscription.findFirst.useQuery({
     where: { userId: user?.id },
   })
 
-  const isPremiumUser = subscription?.status === 'active'
+  const isPremiumUser = checkRole('ADMIN') || subscription?.status === 'active'
 
   const handleUpgrade = () => {
     navigate('/courses')
   }
 
-  const handleWatchCourse = async (course: any) => {
+  const handleJoinCourse = async (course: any) => {
     if (!isLoggedIn) {
-      message.warning('Please login to watch courses')
+      message.warning('Please login to join courses')
       return
     }
 
     if (course.isPremium && !isPremiumUser) {
-      message.info('This is a premium course. Please upgrade to watch.')
+      navigate(`/courses/${course.id}/preview`)
       return
     }
 
-    // Open video in new tab
-    window.open(isPremiumUser ? course.contentUrl : course.previewUrl, '_blank')
+    try {
+      await Api.course.enroll.mutate({ courseId: course.id })
+      navigate(`/courses/${course.id}`)
+    } catch (error) {
+      message.error('Failed to join course')
+    }
   }
 
   if (isLoading) {
@@ -57,7 +62,7 @@ export default function CoursesPage() {
           </Text>
         </div>
 
-        {!isPremiumUser && (
+        {!isPremiumUser && !checkRole('ADMIN') && (
           <Card
             style={{
               marginBottom: '24px',
@@ -66,7 +71,7 @@ export default function CoursesPage() {
             }}
           >
             <Title level={4}>
-              <i className="las la-crown"></i> Unlock Premium Content
+              <i className="las la-crown"></i> Unlock All Premium Content
             </Title>
             <Text>
               Get unlimited access to all our premium courses and exclusive
@@ -86,19 +91,41 @@ export default function CoursesPage() {
               <Card
                 hoverable
                 cover={
-                  <div
-                    style={{
-                      height: '200px',
-                      background: '#f0f0f0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <i
-                      className="las la-play-circle"
-                      style={{ fontSize: '48px', color: '#1890ff' }}
-                    ></i>
+                  <div style={{ position: 'relative' }}>
+                    <ImageOptimizedClient.Img
+                      src={course.previewUrl}
+                      srcOnError="/images/course-fallback.jpg"
+                      isPretty={true}
+                      styleWrapper={{
+                        position: 'relative',
+                        maxWidth: '100%',
+                        height: 'auto',
+                        aspectRatio: '16/9'
+                      }}
+                      styleImg={{
+                        objectFit: 'cover',
+                        objectPosition: 'center',
+                        width: '100%',
+                        height: '100%'
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <i
+                        className="las la-play-circle"
+                        style={{ fontSize: '48px', color: '#1890ff' }}
+                      ></i>
+                    </div>
                   </div>
                 }
                 actions={[
@@ -106,11 +133,9 @@ export default function CoursesPage() {
                     key="watch"
                     type="primary"
                     block
-                    onClick={() => handleWatchCourse(course)}
+                    onClick={() => handleJoinCourse(course)}
                   >
-                    {course.isPremium && !isPremiumUser
-                      ? 'Watch Preview'
-                      : 'Watch Now'}
+                    Join Course
                   </Button>,
                 ]}
               >

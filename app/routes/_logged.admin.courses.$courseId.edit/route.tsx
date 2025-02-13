@@ -34,8 +34,20 @@ export default function CourseEditPage() {
   const [showFirstConfirm, setShowFirstConfirm] = useState(false)
   const [showSecondConfirm, setShowSecondConfirm] = useState(false)
   const [videoToDelete, setVideoToDelete] = useState<string | null>(null)
+  const [fileList, setFileList] = useState<UploadFile[]>([])
 
   useEffect(() => {
+    if (course?.previewUrl) {
+      setFileList([
+        {
+          uid: '-1',
+          name: 'preview.png',
+          status: 'done',
+          url: course.previewUrl,
+        },
+      ])
+    }
+    
     const loadTikTokScript = () => {
       const script = document.createElement('script')
       script.src = 'https://www.tiktok.com/embed.js'
@@ -75,9 +87,18 @@ export default function CourseEditPage() {
 
   const handleCourseSubmit = async (values: any) => {
     try {
+      let previewUrl = values.previewUrl
+      if (fileList.length > 0 && fileList[0] instanceof File) {
+        const { url } = await upload({ file: fileList[0] as RcFile })
+        previewUrl = url
+      }
+
       await updateCourse({
         where: { id: courseId },
-        data: values,
+        data: {
+          ...values,
+          previewUrl,
+        },
       })
       message.success('Course updated successfully')
       refetch()
@@ -181,7 +202,7 @@ export default function CourseEditPage() {
 
   return (
     <PageLayout>
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto p-6 md:p-4 sm:p-2">
         <Title level={2}>Edit Course</Title>
 
         <Form
@@ -191,20 +212,36 @@ export default function CourseEditPage() {
           onFinish={handleCourseSubmit}
           className="mb-8"
         >
-          <Form.Item name="title" label="Title" rules={[{ required: true }]}>
-            <Input />
+          <Form.Item name="title" label="Title" rules={[{ required: true }]} className="w-full">
+            <Input className="w-full" />
+          </Form.Item>
+
+          <Form.Item name="previewUrl" label="Preview Image">
+            <Upload 
+              fileList={fileList}
+              beforeUpload={(file) => {
+                setFileList([file])
+                return false
+              }}
+              onRemove={() => setFileList([])}
+              maxCount={1}
+              listType="picture-card"
+            >
+              {fileList.length === 0 && '+ Upload'}
+            </Upload>
           </Form.Item>
 
           <Form.Item
             name="description"
             label="Description"
             rules={[{ required: true }]}
+            className="w-full"
           >
-            <Input.TextArea />
+            <Input.TextArea className="w-full" />
           </Form.Item>
 
-          <Form.Item name="price" label="Price" rules={[{ required: true }]}>
-            <Input />
+          <Form.Item name="price" label="Price" rules={[{ required: true }]} className="w-full">
+            <Input className="w-full" />
           </Form.Item>
 
           <Button type="primary" htmlType="submit">
@@ -223,12 +260,13 @@ export default function CourseEditPage() {
               name="title"
               label="Section Title"
               rules={[{ required: true }]}
+              className="w-full"
             >
-              <Input />
+              <Input className="w-full" />
             </Form.Item>
 
-            <Form.Item name="order" label="Order" rules={[{ required: true }]}>
-              <InputNumber min={1} />
+            <Form.Item name="order" label="Order" rules={[{ required: true }]} className="w-full">
+              <InputNumber min={1} className="w-full" />
             </Form.Item>
 
             <Button type="primary" htmlType="submit">
@@ -242,9 +280,9 @@ export default function CourseEditPage() {
           renderItem={(section: any) => (
             <List.Item>
               <div className="w-full">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
                   <Title level={4}>{section.title}</Title>
-                  <Space>
+                  <Space gap={2}>
                     <Button
                       type="primary"
                       onClick={() => {
@@ -264,9 +302,9 @@ export default function CourseEditPage() {
                 <Table 
                   dataSource={section.videos}
                   columns={[
-                    { title: 'Title', dataIndex: 'title' },
-                    { title: 'Source', dataIndex: 'embedLink' },
-                    { title: 'Order', dataIndex: 'order' },
+                    { title: 'Title', dataIndex: 'title', ellipsis: true },
+                    { title: 'Source', dataIndex: 'embedLink', ellipsis: true },
+                    { title: 'Order', dataIndex: 'order', ellipsis: true },
                     { 
                       title: 'Actions',
                       render: (_, video) => (
@@ -278,6 +316,8 @@ export default function CourseEditPage() {
                     }
                   ]}
                   pagination={false}
+                  scroll={{ x: true }}
+                  responsive={true}
                 />
               </div>
             </List.Item>
@@ -287,6 +327,8 @@ export default function CourseEditPage() {
         <Modal
           title={editingVideo ? 'Edit Video' : 'Add Video'}
           open={isVideoModalVisible}
+          width="100%"
+          centered
           onCancel={() => {
             setIsVideoModalVisible(false);
             setEditingVideo(null);
@@ -349,6 +391,8 @@ export default function CourseEditPage() {
         <Modal
           title="Delete Section"
           open={showFirstConfirm}
+          width="100%"
+          centered
           onOk={() => {
             setShowFirstConfirm(false)
             setShowSecondConfirm(true)
@@ -364,6 +408,8 @@ export default function CourseEditPage() {
         <Modal
           title="Final Confirmation"
           open={showSecondConfirm}
+          width="100%"
+          centered
           onOk={() => handleDeleteSection(sectionToDelete!)}
           onCancel={() => {
             setSectionToDelete(null)
@@ -376,6 +422,8 @@ export default function CourseEditPage() {
         <Modal
           title="Delete Video"
           open={!!videoToDelete}
+          width="100%"
+          centered
           onOk={() => {
             handleDeleteVideo(videoToDelete!)
             setVideoToDelete(null)
