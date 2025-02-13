@@ -3,8 +3,9 @@ import { PageLayout } from '@/designSystem'
 import { useNavigate } from '@remix-run/react'
 import { Tabs, Typography } from 'antd'
 import { useEffect } from 'react'
-import UsersTab from './components/UsersTab'
+import CoursesTab from './components/CoursesTab'
 import SkillFeedTab from './components/SkillFeedTab'
+import UsersTab from './components/UsersTab'
 const { Title } = Typography
 
 export default function AdminControlPanel() {
@@ -35,15 +36,11 @@ export default function AdminControlPanel() {
     {
       key: 'courses',
       label: 'Courses',
-      children: (
-        <div className="p-4">
-          <Title level={3}>Courses Management</Title>
-        </div>
-      ),
+      children: <CoursesTab />,
     },
     {
       key: 'skillfeed',
-      label: 'Skillfeed', 
+      label: 'Skillfeed',
       children: (
         <div className="p-4">
           <Title level={3}>Skillfeed Management</Title>

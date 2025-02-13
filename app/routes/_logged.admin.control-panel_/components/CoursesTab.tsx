@@ -1,7 +1,16 @@
-import { Button, Table, message, Select, Typography, Modal, Form, Input, Switch } from 'antd'
 import { Api } from '@/core/trpc'
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
+import {
+  Button,
+  Form,
+  Input,
+  message,
+  Modal,
+  Switch,
+  Table,
+  Typography,
+} from 'antd'
 import { useState } from 'react'
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 
 const { Title } = Typography
 
@@ -22,9 +31,7 @@ export default function CoursesTab() {
   }
 
   const handleEdit = (record: any) => {
-    setEditingCourse(record)
-    form.setFieldsValue(record)
-    setIsModalVisible(true)
+    window.location.href = `/admin/courses/${record.id}/edit`
   }
 
   const handleDelete = async (id: string) => {
@@ -43,7 +50,7 @@ export default function CoursesTab() {
       if (editingCourse) {
         await updateCourse({
           where: { id: editingCourse.id },
-          data: values
+          data: values,
         })
         message.success('Course updated successfully')
       } else {
@@ -69,26 +76,23 @@ export default function CoursesTab() {
       key: 'description',
     },
     {
-      title: 'Premium',
-      dataIndex: 'isPremium',
-      key: 'isPremium',
-      render: (isPremium: boolean) => (isPremium ? 'Yes' : 'No'),
-    },
-    {
       title: 'Price',
       dataIndex: 'price',
       key: 'price',
       render: (price: string) => `$${price}`,
     },
     {
+      title: 'Premium',
+      dataIndex: 'isPremium',
+      key: 'isPremium',
+      render: (isPremium: boolean) => (isPremium ? 'Yes' : 'No'),
+    },
+    {
       title: 'Actions',
       key: 'actions',
       render: (_: any, record: any) => (
         <div className="flex gap-2">
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
+          <Button icon={<EditOutlined />} onClick={() => handleEdit(record)}>
             Edit
           </Button>
           <Button
@@ -107,11 +111,7 @@ export default function CoursesTab() {
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
         <Title level={3}>Courses Management</Title>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={handleCreate}
-        >
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
           Add Course
         </Button>
       </div>
@@ -122,6 +122,7 @@ export default function CoursesTab() {
         rowKey="id"
         loading={isLoading}
         pagination={{ pageSize: 10 }}
+        scroll={{ x: true }}
       />
 
       <Modal
@@ -130,10 +131,7 @@ export default function CoursesTab() {
         onOk={handleModalOk}
         onCancel={() => setIsModalVisible(false)}
       >
-        <Form
-          form={form}
-          layout="vertical"
-        >
+        <Form form={form} layout="vertical">
           <Form.Item
             name="title"
             label="Title"
@@ -144,15 +142,13 @@ export default function CoursesTab() {
           <Form.Item
             name="description"
             label="Description"
-            rules={[{ required: true, message: 'Please input course description!' }]}
+            rules={[
+              { required: true, message: 'Please input course description!' },
+            ]}
           >
             <Input.TextArea />
           </Form.Item>
-          <Form.Item
-            name="isPremium"
-            label="Premium"
-            valuePropName="checked"
-          >
+          <Form.Item name="isPremium" label="Premium" valuePropName="checked">
             <Switch />
           </Form.Item>
           <Form.Item

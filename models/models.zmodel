@@ -52,16 +52,45 @@ model Subscription {
 
 model Course {
 
-    id          String   @id @default(uuid())
+    id          String    @id @default(uuid())
     title       String?
     description String?
     previewUrl  String?
     contentUrl  String?
     isPremium   Boolean
     price       String?
+    sections    Section[]
 
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt @default(now())
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model Section {
+    id        String   @id @default(uuid())
+    title     String
+    order     Int
+    courseId  String
+    course    Course   @relation(fields: [courseId], references: [id])
+    videos    Video[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    @@allow("all", true)
+}
+
+model Video {
+    id           String   @id @default(uuid())
+    title        String
+    description  String
+    embedLink    String
+    fileUrl      String?
+    documentUrl  String?
+    documentType String?
+    order        Int
+    sectionId    String
+    section      Section  @relation(fields: [sectionId], references: [id])
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
     @@allow("all", true)
 }
 
@@ -135,7 +164,8 @@ model SkillFeedVideo {
     link        String
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt @default(now())
-    
+
     @@allow('all', true)
 }
 
+  
