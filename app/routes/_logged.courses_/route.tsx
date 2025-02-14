@@ -3,8 +3,8 @@ import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
 import { useNavigate } from '@remix-run/react'
 import { Button, Card, Col, Row, Spin, Typography, message } from 'antd'
-import { ImageOptimizedClient } from '~/plugins/image-optimize/client'
 import { useState } from 'react'
+import { ImageOptimizedClient } from '~/plugins/image-optimize/client'
 const { Title, Text } = Typography
 
 export default function CoursesPage() {
@@ -14,11 +14,25 @@ export default function CoursesPage() {
   const { data: subscription } = Api.subscription.findFirst.useQuery({
     where: { userId: user?.id },
   })
+  const { data: premiumLink, isLoading: isLoadingPremiumLink } =
+    Api.premiumLink.findFirst.useQuery(undefined, {
+      retry: false,
+    })
 
   const isPremiumUser = checkRole(['ADMIN', 'PREMIUM'])
 
-  const handleUpgrade = () => {
-    navigate('/courses')
+  const handleUpgrade = async () => {
+    try {
+      if (premiumLink?.url) {
+        window.location.href = premiumLink.url
+      } else {
+        navigate('/upgrade')
+      }
+    } catch (error) {
+      console.error('Error handling upgrade:', error)
+      message.error('Failed to process upgrade request. Please try again.')
+      navigate('/upgrade')
+    }
   }
 
   const [isEnrolling, setIsEnrolling] = useState(false)
@@ -34,7 +48,9 @@ export default function CoursesPage() {
 
     if (course.isPremium) {
       if (!checkRole(['ADMIN', 'PREMIUM'])) {
-        message.warning('This is a premium course. Please upgrade your subscription to access.')
+        message.warning(
+          'This is a premium course. Please upgrade your subscription to access.',
+        )
         navigate(`/courses/${course.id}/preview`)
         return
       }
@@ -42,11 +58,11 @@ export default function CoursesPage() {
 
     setIsEnrolling(true)
     try {
-      await createEnrollment({ 
+      await createEnrollment({
         data: {
           courseId: course.id,
-          userId: user.id 
-        }
+          userId: user.id,
+        },
       })
       message.success('Successfully enrolled in course')
       navigate(`/courses/${course.id}`)
@@ -126,13 +142,13 @@ export default function CoursesPage() {
                         position: 'relative',
                         maxWidth: '100%',
                         height: 'auto',
-                        aspectRatio: '16/9'
+                        aspectRatio: '16/9',
                       }}
                       styleImg={{
                         objectFit: 'cover',
                         objectPosition: 'center',
                         width: '100%',
-                        height: '100%'
+                        height: '100%',
                       }}
                     />
                     <div
@@ -144,7 +160,7 @@ export default function CoursesPage() {
                         bottom: 0,
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
                       }}
                     >
                       <i

@@ -4,6 +4,7 @@ import { useNavigate } from '@remix-run/react'
 import { Tabs, Typography } from 'antd'
 import { useEffect } from 'react'
 import CoursesTab from './components/CoursesTab'
+import PremiumUpgradeTab from './components/PremiumUpgradeTab'
 import SkillFeedTab from './components/SkillFeedTab'
 import UsersTab from './components/UsersTab'
 const { Title } = Typography
@@ -25,13 +26,9 @@ export default function AdminControlPanel() {
       children: <UsersTab />,
     },
     {
-      key: 'sales',
-      label: 'Sales',
-      children: (
-        <div className="p-4">
-          <Title level={3}>Sales Analytics</Title>
-        </div>
-      ),
+      key: 'premium',
+      label: 'Premium Upgrade',
+      children: <PremiumUpgradeTab />,
     },
     {
       key: 'courses',

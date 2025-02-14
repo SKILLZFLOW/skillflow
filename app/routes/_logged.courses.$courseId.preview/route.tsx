@@ -3,7 +3,6 @@ import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
 import { useNavigate, useParams } from '@remix-run/react'
 import { Button, Card, List, Spin, Typography, message } from 'antd'
-import { useState } from 'react'
 import { ImageOptimizedClient } from '~/plugins/image-optimize/client'
 
 const { Title, Text } = Typography
@@ -69,10 +68,7 @@ export default function CoursePreviewPage() {
 
         <div className="flex items-center gap-4 mt-4">
           <Text strong>XAF {course?.price}</Text>
-          <Button
-            type="primary"
-            onClick={() => handleGetNow(course)}
-          >
+          <Button type="primary" onClick={() => handleGetNow(course)}>
             GET NOW
           </Button>
         </div>
@@ -111,10 +107,10 @@ export default function CoursePreviewPage() {
             content.
           </Text>
           <div style={{ marginTop: '16px' }}>
-            <Button 
-              type="primary" 
-              size="large" 
-              onClick={() => handleGetNow(course)}
+            <Button
+              type="primary"
+              size="large"
+              onClick={() => navigate('/upgrade')}
             >
               Upgrade Now
             </Button>

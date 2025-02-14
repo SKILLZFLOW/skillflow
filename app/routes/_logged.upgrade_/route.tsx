@@ -3,6 +3,7 @@ import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
 import { useNavigate } from '@remix-run/react'
 import { Button, Card, Col, Flex, message, Row, Typography } from 'antd'
+import { useEffect } from 'react'
 const { Title, Text, Paragraph } = Typography
 
 export default function UpgradePage() {
@@ -11,6 +12,19 @@ export default function UpgradePage() {
   const { data: products, isLoading } = Api.billing.findManyProducts.useQuery(
     {},
   )
+  const { data: premiumLink, isLoading: isPremiumLoading, error: premiumError, refetch } = Api.premiumLink.findFirst.useQuery(undefined, {
+    retry: false,
+    onError: (error) => {
+      console.error('Premium link query failed:', error)
+      console.error('Error details:', JSON.stringify(error))
+    }
+  })
+
+  useEffect(() => {
+    if (premiumError) {
+      message.error('Failed to load premium payment link. Please try again later.')
+    }
+  }, [premiumError])
   const { mutateAsync: createPaymentLink } =
     Api.billing.createPaymentLink.useMutation()
 
@@ -78,6 +92,29 @@ export default function UpgradePage() {
           ))}
         </Row>
 
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => {
+              if (isPremiumLoading) return;
+              if (premiumLink?.url) {
+                console.log('Redirecting to:', premiumLink.url);
+                window.location.href = premiumLink.url;
+              }
+            }}
+            loading={isPremiumLoading}
+            icon={<i className="las la-gem" />}
+            style={{
+              background: '#1890ff',
+              borderColor: '#1890ff',
+              padding: '0 40px',
+            }}
+          >
+            PAY NOW
+          </Button>
+        </div>
+
         <Row gutter={[24, 24]} justify="center">
           {isLoading ? (
             <Col span={24} style={{ textAlign: 'center' }}>
@@ -125,6 +162,26 @@ export default function UpgradePage() {
                       className="hover:opacity-90 transition-opacity"
                     >
                       Pay with Fapshi
+                    </Button>
+                    <Button
+                      type="primary"
+                      size="large" 
+                      block
+                      onClick={() => {
+                        if (isPremiumLoading) return;
+                        if (premiumLink?.url) {
+                          console.log('Redirecting to:', premiumLink.url);
+                          window.location.href = premiumLink.url;
+                        }
+                      }}
+                      loading={isPremiumLoading}
+                      icon={<i className="las la-gem" />}
+                      style={{
+                        background: '#1890ff',
+                        borderColor: '#1890ff',
+                      }}
+                    >
+                      Pay Now
                     </Button>
                     <Button
                       type="default"

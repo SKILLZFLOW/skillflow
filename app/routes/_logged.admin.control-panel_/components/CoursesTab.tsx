@@ -6,6 +6,7 @@ import {
   Input,
   message,
   Modal,
+  Select,
   Switch,
   Table,
   Typography,
@@ -15,7 +16,23 @@ import { useState } from 'react'
 const { Title } = Typography
 
 export default function CoursesTab() {
-  const { data: courses, isLoading, refetch } = Api.course.findMany.useQuery()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [typeFilter, setTypeFilter] = useState<string | null>(null)
+
+  const { data: courses, isLoading, refetch } = Api.course.findMany.useQuery({
+    where: {
+      AND: [
+        typeFilter === 'premium' ? { isPremium: true } : 
+        typeFilter === 'free' ? { isPremium: false } : {},
+        {
+          OR: [
+            { title: { contains: searchQuery } },
+            { description: { contains: searchQuery } }
+          ]
+        }
+      ]
+    }
+  })
   const { mutateAsync: createCourse } = Api.course.create.useMutation()
   const { mutateAsync: updateCourse } = Api.course.update.useMutation()
   const { mutateAsync: deleteCourse } = Api.course.delete.useMutation()
@@ -114,6 +131,25 @@ export default function CoursesTab() {
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
           Add Course
         </Button>
+      </div>
+
+      <div className="flex gap-4 mb-4">
+        <Input.Search
+          placeholder="Search courses..."
+          onChange={e => setSearchQuery(e.target.value)}
+          style={{ width: 300 }}
+        />
+        <Select
+          placeholder="Filter by type"
+          allowClear
+          style={{ width: 200 }}
+          onChange={value => setTypeFilter(value)}
+          options={[
+            { label: 'All', value: null },
+            { label: 'Free', value: 'free' },
+            { label: 'Premium', value: 'premium' }
+          ]}
+        />
       </div>
 
       <Table
