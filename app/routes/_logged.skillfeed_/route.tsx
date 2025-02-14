@@ -78,7 +78,7 @@ export default function HomePage() {
                 Unsupported video format
               </div>
             )}
-            <div className="mt-2 bg-gray-100 p-4 rounded-lg">
+            <div className="mt-2 bg-gray-200 p-4 rounded-lg">
               <Title level={4}>{video.title}</Title>
               <Paragraph
                 ellipsis={expandedDescriptions[video.id] ? false : {rows: 2}}
