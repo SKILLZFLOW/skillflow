@@ -113,6 +113,11 @@ export default function UpgradePage() {
           >
             PAY NOW
           </Button>
+          {premiumLink?.url && (
+            <div style={{ textAlign: 'center', marginTop: '8px' }}>
+              <Text type='secondary'>Payment Link: {premiumLink.url}</Text>
+            </div>
+          )}
         </div>
 
         <Row gutter={[24, 24]} justify="center">
