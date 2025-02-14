@@ -1,8 +1,8 @@
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
 import { useUploadPublic } from '@/plugins/upload/client'
+import type { Prisma, Video } from '@prisma/client'
 import { useParams } from '@remix-run/react'
-import { useEffect } from 'react'
 import {
   Button,
   Form,
@@ -17,7 +17,9 @@ import {
   Typography,
   Upload,
 } from 'antd'
-import { useState } from 'react'
+import type { RcFile, UploadFile } from 'antd/es/upload/interface'
+import { useEffect, useState } from 'react'
+import { ImageOptimizedClient } from '~/plugins/image-optimize/client'
 
 const { Title } = Typography
 
@@ -47,7 +49,7 @@ export default function CourseEditPage() {
         },
       ])
     }
-    
+
     const loadTikTokScript = () => {
       const script = document.createElement('script')
       script.src = 'https://www.tiktok.com/embed.js'
@@ -103,16 +105,16 @@ export default function CourseEditPage() {
       const updateData: Prisma.CourseUpdateInput = {
         ...rest,
         previewUrl,
-        paymentLink: paymentLink || null
+        paymentLink: paymentLink || null,
       }
 
       console.log('Updating course with data:', updateData)
 
       await updateCourse({
         where: { id: courseId },
-        data: updateData
+        data: updateData,
       })
-      
+
       message.success('Course updated successfully')
       refetch()
     } catch (error) {
@@ -139,21 +141,21 @@ export default function CourseEditPage() {
   }
 
   const handleEditVideo = (video: any) => {
-    setEditingVideo(video);
-    videoForm.setFieldsValue(video);
-    setIsVideoModalVisible(true);
-  };
+    setEditingVideo(video)
+    videoForm.setFieldsValue(video)
+    setIsVideoModalVisible(true)
+  }
 
   const handleDeleteVideo = async (videoId: string) => {
     try {
-      await deleteVideo({ where: { id: videoId } });
-      message.success('Video deleted successfully');
-      refetch();
+      await deleteVideo({ where: { id: videoId } })
+      message.success('Video deleted successfully')
+      refetch()
     } catch (error) {
-      console.error('Delete video error:', error);
-      message.error(`Failed to delete video: ${error.message}`);
+      console.error('Delete video error:', error)
+      message.error(`Failed to delete video: ${error.message}`)
     }
-  };
+  }
 
   const handleDeleteSection = async (sectionId: string) => {
     try {
@@ -171,39 +173,39 @@ export default function CourseEditPage() {
   }
 
   const handleAddVideo = async (values: Prisma.VideoCreateInput) => {
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
       const videoData = {
         title: values.title,
         description: values.description,
         embedLink: values.embedLink,
         order: values.order,
-        sectionId: selectedSectionId!
-      };
-      
+        sectionId: selectedSectionId!,
+      }
+
       if (editingVideo) {
         await updateVideo({
           where: { id: editingVideo.id },
-          data: videoData
-        });
-        message.success('Video updated successfully');
+          data: videoData,
+        })
+        message.success('Video updated successfully')
       } else {
         await createVideo({
           data: videoData,
-        });
-        message.success('Video added successfully');
+        })
+        message.success('Video added successfully')
       }
-      refetch();
+      refetch()
     } catch (error) {
-      console.error('Video save error:', error);
-      message.error(`Failed to save video: ${error.message}`);
+      console.error('Video save error:', error)
+      message.error(`Failed to save video: ${error.message}`)
     } finally {
-      setIsVideoModalVisible(false);
-      setEditingVideo(null);
-      videoForm.resetFields();
-      setIsSubmitting(false);
+      setIsVideoModalVisible(false)
+      setEditingVideo(null)
+      videoForm.resetFields()
+      setIsSubmitting(false)
     }
-  };
+  }
 
   if (isLoading) {
     return (
@@ -227,20 +229,46 @@ export default function CourseEditPage() {
           onFinish={handleCourseSubmit}
           className="mb-8"
         >
-          <Form.Item name="title" label="Title" rules={[{ required: true }]} className="w-full">
+          <Form.Item
+            name="title"
+            label="Title"
+            rules={[{ required: true }]}
+            className="w-full"
+          >
             <Input className="w-full" />
           </Form.Item>
 
-          <Form.Item name="previewUrl" label="Preview Image">
-            <Upload 
+          {course?.previewUrl && (
+            <Form.Item name="previewUrl" label="Current Preview Image">
+              <ImageOptimizedClient.Img
+                src={course.previewUrl}
+                isPretty={true}
+                styleWrapper={{
+                  position: 'relative',
+                  maxWidth: '100%',
+                  height: 'auto',
+                  aspectRatio: '16/9',
+                }}
+                styleImg={{
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                  width: '100%',
+                  height: '100%',
+                }}
+              />
+            </Form.Item>
+          )}
+
+          <Form.Item name="previewUrl" label={course?.previewUrl ? "Change Preview Image" : "Preview Image"}>
+            <Upload
               fileList={fileList}
-              beforeUpload={(file) => {
+              beforeUpload={file => {
                 setFileList([file])
                 return false
               }}
               onRemove={() => setFileList([])}
               maxCount={1}
-              listType="picture-card"
+              listType="picture"
             >
               {fileList.length === 0 && '+ Upload'}
             </Upload>
@@ -255,7 +283,12 @@ export default function CourseEditPage() {
             <Input.TextArea className="w-full" />
           </Form.Item>
 
-          <Form.Item name="price" label="Price" rules={[{ required: true }]} className="w-full">
+          <Form.Item
+            name="price"
+            label="Price (XAF)"
+            rules={[{ required: true }]}
+            className="w-full"
+          >
             <Input className="w-full" />
           </Form.Item>
 
@@ -284,7 +317,12 @@ export default function CourseEditPage() {
               <Input className="w-full" />
             </Form.Item>
 
-            <Form.Item name="order" label="Order" rules={[{ required: true }]} className="w-full">
+            <Form.Item
+              name="order"
+              label="Order"
+              rules={[{ required: true }]}
+              className="w-full"
+            >
               <InputNumber min={1} className="w-full" />
             </Form.Item>
 
@@ -311,28 +349,40 @@ export default function CourseEditPage() {
                     >
                       Add Video
                     </Button>
-                    <Button danger onClick={() => {
-                      setSectionToDelete(section.id)
-                      setShowFirstConfirm(true)
-                    }}>Delete Section</Button>
+                    <Button
+                      danger
+                      onClick={() => {
+                        setSectionToDelete(section.id)
+                        setShowFirstConfirm(true)
+                      }}
+                    >
+                      Delete Section
+                    </Button>
                   </Space>
                 </div>
 
-                <Table 
+                <Table
                   dataSource={section.videos}
                   columns={[
                     { title: 'Title', dataIndex: 'title', ellipsis: true },
                     { title: 'Source', dataIndex: 'embedLink', ellipsis: true },
                     { title: 'Order', dataIndex: 'order', ellipsis: true },
-                    { 
+                    {
                       title: 'Actions',
                       render: (_, video) => (
                         <Space>
-                          <Button onClick={() => handleEditVideo(video)}>Edit</Button>
-                          <Button danger onClick={() => setVideoToDelete(video.id)}>Delete</Button>
+                          <Button onClick={() => handleEditVideo(video)}>
+                            Edit
+                          </Button>
+                          <Button
+                            danger
+                            onClick={() => setVideoToDelete(video.id)}
+                          >
+                            Delete
+                          </Button>
                         </Space>
-                      )
-                    }
+                      ),
+                    },
                   ]}
                   pagination={false}
                   scroll={{ x: true }}
@@ -349,9 +399,9 @@ export default function CourseEditPage() {
           width="100%"
           centered
           onCancel={() => {
-            setIsVideoModalVisible(false);
-            setEditingVideo(null);
-            videoForm.resetFields();
+            setIsVideoModalVisible(false)
+            setEditingVideo(null)
+            videoForm.resetFields()
           }}
           footer={null}
         >
@@ -387,7 +437,8 @@ export default function CourseEditPage() {
               rules={[
                 { required: true },
                 {
-                  pattern: /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=[\w-]+|youtu\.be\/[\w-]+(\?si=[\w-]+)?|tiktok\.com\/@[\w-]+\/video\/[\d]+)$/,
+                  pattern:
+                    /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=[\w-]+|youtu\.be\/[\w-]+(\?si=[\w-]+)?|tiktok\.com\/@[\w-]+\/video\/[\d]+)$/,
                   message: 'Please enter a valid YouTube or TikTok URL',
                 },
               ]}
@@ -395,11 +446,9 @@ export default function CourseEditPage() {
               <Input />
             </Form.Item>
 
-
             <Form.Item name="order" label="Order" rules={[{ required: true }]}>
               <InputNumber min={1} />
             </Form.Item>
-
 
             <Button type="primary" htmlType="submit" loading={isSubmitting}>
               {editingVideo ? 'Update' : 'Add'} Video
@@ -421,7 +470,10 @@ export default function CourseEditPage() {
             setShowFirstConfirm(false)
           }}
         >
-          <p>Are you sure you want to delete this section? All videos will be deleted.</p>
+          <p>
+            Are you sure you want to delete this section? All videos will be
+            deleted.
+          </p>
         </Modal>
 
         <Modal
@@ -449,7 +501,10 @@ export default function CourseEditPage() {
           }}
           onCancel={() => setVideoToDelete(null)}
         >
-          <p>Are you sure you want to delete this video? This action cannot be undone.</p>
+          <p>
+            Are you sure you want to delete this video? This action cannot be
+            undone.
+          </p>
         </Modal>
       </div>
     </PageLayout>

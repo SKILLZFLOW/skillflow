@@ -58,6 +58,8 @@ model Subscription {
   updatedAt DateTime @default(now()) @updatedAt()
 }
 
+/// @@allow('update', auth().globalRole == 'ADMIN')
+/// @@allow('update', auth().globalRole != 'ADMIN' && paymentLink == null)
 /// @@allow('all', true)
 model Course {
   id            String       @id() @default(uuid())
@@ -67,6 +69,7 @@ model Course {
   contentUrl    String?
   isPremium     Boolean
   price         String?
+  paymentLink   String?
   sections      Section[]
   enrolledUsers UserCourse[]
   createdAt     DateTime     @default(now())

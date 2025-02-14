@@ -6,13 +6,18 @@ const { Title } = Typography
 
 export default function UsersTab() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [roleFilter, setRoleFilter] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [isCoursesModalVisible, setIsCoursesModalVisible] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
-  const { data: premiumCourses } = Api.course.findMany.useQuery({ where: { isPremium: true } })
-  const { data: userCourses, refetch: refetchUserCourses } = Api.userCourse.findMany.useQuery(
-    { where: { userId: selectedUser?.id }, include: { course: true } },
-    { enabled: !!selectedUser?.id }
-  )
+  const { data: premiumCourses } = Api.course.findMany.useQuery({
+    where: { isPremium: true },
+  })
+  const { data: userCourses, refetch: refetchUserCourses } =
+    Api.userCourse.findMany.useQuery(
+      { where: { userId: selectedUser?.id }, include: { course: true } },
+      { enabled: !!selectedUser?.id },
+    )
   const { mutateAsync: enrollUser } = Api.userCourse.create.useMutation()
   const { mutateAsync: unenrollUser } = Api.userCourse.delete.useMutation()
   const {
@@ -21,9 +26,15 @@ export default function UsersTab() {
     refetch,
   } = Api.user.findMany.useQuery({
     where: {
-      OR: [
-        { name: { contains: searchQuery } },
-        { email: { contains: searchQuery } },
+      AND: [
+        roleFilter ? { globalRole: roleFilter } : {},
+        statusFilter ? { status: statusFilter } : {},
+        {
+          OR: [
+            { name: { contains: searchQuery } },
+            { email: { contains: searchQuery } },
+          ],
+        },
       ],
     },
   })
@@ -46,7 +57,10 @@ export default function UsersTab() {
     }
   }
 
-  const handleRoleChange = async (userId: string, newRole: 'USER' | 'ADMIN' | 'PREMIUM') => {
+  const handleRoleChange = async (
+    userId: string,
+    newRole: 'USER' | 'ADMIN' | 'PREMIUM',
+  ) => {
     try {
       await updateUser({
         where: { id: userId },
@@ -124,10 +138,12 @@ export default function UsersTab() {
       key: 'actions',
       render: (_: any, record: any) => (
         <div className="flex gap-2">
-          <Button onClick={() => { 
-            setSelectedUser(record); 
-            setIsCoursesModalVisible(true) 
-          }}>
+          <Button
+            onClick={() => {
+              setSelectedUser(record)
+              setIsCoursesModalVisible(true)
+            }}
+          >
             Courses
           </Button>
           <Button
@@ -151,6 +167,29 @@ export default function UsersTab() {
   return (
     <div className="p-4">
       <Title level={3}>Users Management</Title>
+      <div className="flex gap-4 mb-4">
+        <Select
+          placeholder="Filter by role"
+          allowClear
+          style={{ width: 200 }}
+          onChange={value => setRoleFilter(value)}
+          options={[
+            { label: 'User', value: 'USER' },
+            { label: 'Premium', value: 'PREMIUM' },
+            { label: 'Admin', value: 'ADMIN' },
+          ]}
+        />
+        <Select
+          placeholder="Filter by status"
+          allowClear
+          style={{ width: 200 }}
+          onChange={value => setStatusFilter(value)}
+          options={[
+            { label: 'Invited', value: 'INVITED' },
+            { label: 'Verified', value: 'VERIFIED' },
+          ]}
+        />
+      </div>
       <Input.Search
         placeholder="Search by name or email"
         onChange={e => setSearchQuery(e.target.value)}
@@ -165,28 +204,35 @@ export default function UsersTab() {
         pagination={{ pageSize: 10 }}
         scroll={{ x: true }}
       />
-      <Modal 
-        title="Manage User Courses" 
-        open={isCoursesModalVisible} 
-        onCancel={() => setIsCoursesModalVisible(false)} 
+      <Modal
+        title="Manage User Courses"
+        open={isCoursesModalVisible}
+        onCancel={() => setIsCoursesModalVisible(false)}
         footer={null}
       >
         {premiumCourses?.map(course => (
-          <div key={course.id} className="flex justify-between items-center mb-4">
+          <div
+            key={course.id}
+            className="flex justify-between items-center mb-4"
+          >
             <span>{course.title}</span>
             <Select
               value={userCourses?.some(uc => uc.courseId === course.id)}
-              onChange={async (value) => {
+              onChange={async value => {
                 if (value) {
-                  await enrollUser({ data: { courseId: course.id, userId: selectedUser.id } })
+                  await enrollUser({
+                    data: { courseId: course.id, userId: selectedUser.id },
+                  })
                 } else {
-                  await unenrollUser({ where: { courseId: course.id, userId: selectedUser.id } })
+                  await unenrollUser({
+                    where: { courseId: course.id, userId: selectedUser.id },
+                  })
                 }
-                refetchUserCourses();
+                refetchUserCourses()
               }}
               options={[
                 { label: 'Yes', value: true },
-                { label: 'No', value: false }
+                { label: 'No', value: false },
               ]}
             />
           </div>

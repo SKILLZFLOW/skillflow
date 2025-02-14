@@ -77,9 +77,9 @@ export default function CoursesTab() {
     },
     {
       title: 'Price',
-      dataIndex: 'price',
+      dataIndex: 'price', 
       key: 'price',
-      render: (price: string) => `$${price}`,
+      render: (price: string) => `XAF ${price}`,
     },
     {
       title: 'Premium',
@@ -156,7 +156,7 @@ export default function CoursesTab() {
             label="Price"
             rules={[{ required: true, message: 'Please input course price!' }]}
           >
-            <Input prefix="$" />
+            <Input prefix="XAF" />
           </Form.Item>
         </Form>
       </Modal>

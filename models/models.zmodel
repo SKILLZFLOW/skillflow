@@ -67,7 +67,8 @@ model Course {
 
     createdAt     DateTime     @default(now())
     updatedAt     DateTime     @updatedAt @default(now())
-    @@allow('update', auth().globalRole == 'ADMIN' && has_only('paymentLink'))
+    @@allow('update', auth().globalRole == 'ADMIN')
+    @@allow('update', auth().globalRole != 'ADMIN' && paymentLink == null)
     @@allow("all", true)
 }
 
@@ -194,4 +195,4 @@ model PremiumLink {
     @@allow('all', auth().globalRole == 'ADMIN')
 }
 
-      
+        
