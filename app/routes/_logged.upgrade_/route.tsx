@@ -99,7 +99,6 @@ export default function UpgradePage() {
             onClick={() => {
               if (isPremiumLoading) return;
               if (premiumLink?.url) {
-                console.log('Redirecting to:', premiumLink.url);
                 window.location.href = premiumLink.url;
               }
             }}
@@ -113,11 +112,6 @@ export default function UpgradePage() {
           >
             PAY NOW
           </Button>
-          {premiumLink?.url && (
-            <div style={{ textAlign: 'center', marginTop: '8px' }}>
-              <Text type='secondary'>Payment Link: {premiumLink.url}</Text>
-            </div>
-          )}
         </div>
 
         <Row gutter={[24, 24]} justify="center">
@@ -175,7 +169,6 @@ export default function UpgradePage() {
                       onClick={() => {
                         if (isPremiumLoading) return;
                         if (premiumLink?.url) {
-                          console.log('Redirecting to:', premiumLink.url);
                           window.location.href = premiumLink.url;
                         }
                       }}

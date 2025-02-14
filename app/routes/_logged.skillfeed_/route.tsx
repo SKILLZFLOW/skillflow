@@ -1,9 +1,20 @@
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
-import { Typography } from 'antd'
-import { useEffect } from 'react'
+import { Typography, Button } from 'antd'
 
-const { Paragraph, Title } = Typography
+import { useEffect, useState } from 'react'
+
+const { Paragraph, Title, Link } = Typography
+
+const detectUrls = (text: string) => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g
+  return text.split(urlRegex).map((part, i) => {
+    if (part.match(urlRegex)) {
+      return <Link key={i} href={part} target="_blank">{part}</Link>
+    }
+    return part
+  })
+}
 
 const isYoutubeUrl = (url: string) => {
   return url.includes('youtube.com/watch?v=') || url.includes('youtu.be/')
@@ -15,6 +26,11 @@ const isTiktokUrl = (url: string) => {
 
 export default function HomePage() {
   const { data: videos } = Api.skillFeedVideo.findMany.useQuery()
+  const [expandedDescriptions, setExpandedDescriptions] = useState<{[key: string]: boolean}>({})
+
+  const toggleDescription = (videoId: string) => {
+    setExpandedDescriptions(prev => ({ ...prev, [videoId]: !prev[videoId] }))
+  }
 
   useEffect(() => {
     const loadTikTokScript = () => {
@@ -29,7 +45,7 @@ export default function HomePage() {
 
   return (
     <PageLayout layout="full-width">
-      <div className="flex flex-col scroll-smooth snap-y snap-mandatory h-[90vh] overflow-y-scroll">
+      <div className="flex flex-col scroll-smooth snap-y snap-mandatory h-[90vh] overflow-y-scroll mx-[5px]">
         {videos?.map(video => (
           <div
             key={video.id}
@@ -39,7 +55,7 @@ export default function HomePage() {
               <iframe
                 src={video.link.replace(
                   /(youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/,
-                  'youtube.com/embed/$2'
+                  'youtube.com/embed/$2',
                 )}
                 className="w-full h-[90vh] mx-auto rounded-lg"
                 width="100%"
@@ -62,13 +78,23 @@ export default function HomePage() {
                 Unsupported video format
               </div>
             )}
-            <div className="mt-2">
+            <div className="mt-2 bg-gray-100 p-4 rounded-lg">
               <Title level={4}>{video.title}</Title>
               <Paragraph
-                ellipsis={{ rows: 2, expandable: true, symbol: 'Read More' }}
+                ellipsis={expandedDescriptions[video.id] ? false : {rows: 2}}
+                onClick={() => toggleDescription(video.id)}
               >
-                {video.description}
+                {detectUrls(video.description)}
               </Paragraph>
+              {expandedDescriptions[video.id] && (
+                <Button
+                  type='link'
+                  onClick={() => toggleDescription(video.id)}
+                  style={{ padding: 0, marginTop: '8px' }}
+                >
+                  Read Less
+                </Button>
+              )}
             </div>
           </div>
         ))}

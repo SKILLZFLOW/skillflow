@@ -39,7 +39,7 @@ export default function AdminControlPanel() {
       key: 'skillfeed',
       label: 'Skillfeed',
       children: (
-        <div className="p-4">
+        <div>
           <Title level={3}>Skillfeed Management</Title>
           <SkillFeedTab />
         </div>

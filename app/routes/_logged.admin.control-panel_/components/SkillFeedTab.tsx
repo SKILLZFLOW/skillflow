@@ -1,10 +1,11 @@
-import { Table, Typography, Form, Input, Button, message } from 'antd'
 import { Api } from '@/core/trpc'
+import { EditOutlined } from '@ant-design/icons'
+import { Button, Form, Input, message, Modal, Table, Typography } from 'antd'
 import { useState } from 'react'
 
 interface VideoFormValues {
   title: string
-  description: string 
+  description: string
   link: string
 }
 
@@ -12,14 +13,33 @@ const { Title } = Typography
 
 export default function SkillFeedTab() {
   const [form] = Form.useForm()
-  
-  const { data: videos, isLoading: isLoadingVideos, refetch } = Api.skillFeedVideo.findMany.useQuery()
-  const { mutateAsync: createVideo, isLoading: isCreating } = Api.skillFeedVideo.create.useMutation()
+  const [editingVideo, setEditingVideo] = useState<any>(null)
+  const [isModalVisible, setIsModalVisible] = useState(false)
+
+  const {
+    data: videos,
+    isLoading: isLoadingVideos,
+    refetch,
+  } = Api.skillFeedVideo.findMany.useQuery()
+  const { mutateAsync: createVideo, isLoading: isCreating } =
+    Api.skillFeedVideo.create.useMutation()
+  const { mutateAsync: updateVideo, isLoading: isUpdating } =
+    Api.skillFeedVideo.update.useMutation()
+
   const handleSubmit = async (values: VideoFormValues) => {
     try {
-      console.log('Creating video with data:', values)
-      await createVideo({ data: values })
-      message.success('Video created successfully')
+      if (editingVideo) {
+        await updateVideo({
+          where: { id: editingVideo.id },
+          data: values,
+        })
+        message.success('Video updated successfully')
+      } else {
+        await createVideo({ data: values })
+        message.success('Video created successfully')
+      }
+      setIsModalVisible(false)
+      setEditingVideo(null)
       form.resetFields()
       refetch()
     } catch (error) {
@@ -29,25 +49,63 @@ export default function SkillFeedTab() {
   }
 
   const columns: Array<{
-    title: string;
-    dataIndex: string;
-    key: string;
+    title: string
+    dataIndex: string
+    key: string
+    width?: string
+    ellipsis?: boolean
+    render?: (text: string, record: any) => React.ReactNode
   }> = [
     {
       title: 'Title',
       dataIndex: 'title',
-      key: 'title'
+      key: 'title',
+      width: '150px',
+      ellipsis: true,
+      render: (text, record) => {
+        if (editingVideo?.id === record.id) return text;
+        return <div className="whitespace-normal">{text.length > 60 ? `${text.slice(0, 60)}...` : text}</div>;
+      }
     },
     {
-      title: 'Description', 
+      title: 'Description',
       dataIndex: 'description',
-      key: 'description'
+      key: 'description',
+      width: '150px',
+      ellipsis: true,
+      render: (text, record) => {
+        if (editingVideo?.id === record.id) return text;
+        return <div className="whitespace-normal">{text.length > 198 ? `${text.slice(0, 198)}...` : text}</div>;
+      }
     },
     {
       title: 'Link',
       dataIndex: 'link',
-      key: 'link'
-    }
+      key: 'link',
+      width: '150px',
+      ellipsis: true,
+      render: (text, record) => {
+        if (editingVideo?.id === record.id) return text;
+        return <div className="whitespace-normal">{text.length > 198 ? `${text.slice(0, 198)}...` : text}</div>;
+      }
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      dataIndex: 'actions',
+      render: (_, record) => (
+        <Button
+          icon={<EditOutlined />}
+          onClick={() => {
+            setEditingVideo(record)
+            form.setFieldsValue(record)
+            setIsModalVisible(true)
+          }}
+        >
+          Edit
+        </Button>
+      ),
+    },
   ]
 
   return (
@@ -56,12 +114,29 @@ export default function SkillFeedTab() {
         <Title level={3}>SkillFeed Videos</Title>
       </div>
 
-      <div className="mb-8">
-        <Form
-          form={form}
-          onFinish={handleSubmit}
-          layout="vertical"
-        >
+      <Button
+        type="primary"
+        onClick={() => {
+          form.resetFields()
+          setEditingVideo(null)
+          setIsModalVisible(true)
+        }}
+        className="mb-4"
+      >
+        Add Video
+      </Button>
+
+      <Modal
+        title={editingVideo ? 'Edit Video' : 'Add Video'}
+        open={isModalVisible}
+        onCancel={() => {
+          setIsModalVisible(false)
+          setEditingVideo(null)
+          form.resetFields()
+        }}
+        footer={null}
+      >
+        <Form form={form} onFinish={handleSubmit} layout="vertical">
           <Form.Item
             name="title"
             label="Title"
@@ -73,7 +148,9 @@ export default function SkillFeedTab() {
           <Form.Item
             name="description"
             label="Description"
-            rules={[{ required: true, message: 'Please input video description!' }]}
+            rules={[
+              { required: true, message: 'Please input video description!' },
+            ]}
           >
             <Input.TextArea />
           </Form.Item>
@@ -83,19 +160,39 @@ export default function SkillFeedTab() {
             label="Link"
             rules={[
               { required: true },
-              { pattern: /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=[\w-]+|tiktok\.com\/@[\w-]+\/video\/[\d]+)$/, message: 'Please enter a valid YouTube or TikTok URL' }
+              {
+                pattern:
+                  /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=[\w-]+|youtu\.be\/[\w-]+|tiktok\.com\/@[\w-]+\/video\/[\d]+)$/,
+                message:
+                  'Please enter a valid YouTube (youtube.com or youtu.be) or TikTok URL',
+              },
             ]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={isCreating}>
-              Add Video
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={isCreating || isUpdating}
+              >
+                {editingVideo ? 'Update' : 'Add'} Video
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsModalVisible(false)
+                  setEditingVideo(null)
+                  form.resetFields()
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
           </Form.Item>
         </Form>
-      </div>
+      </Modal>
 
       <Table
         columns={columns}
