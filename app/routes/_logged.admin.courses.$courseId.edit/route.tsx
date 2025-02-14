@@ -13,6 +13,7 @@ import {
   Modal,
   Space,
   Spin,
+  Switch,
   Table,
   Typography,
   Upload,
@@ -259,7 +260,12 @@ export default function CourseEditPage() {
             </Form.Item>
           )}
 
-          <Form.Item name="previewUrl" label={course?.previewUrl ? "Change Preview Image" : "Preview Image"}>
+          <Form.Item
+            name="previewUrl"
+            label={
+              course?.previewUrl ? 'Change Preview Image' : 'Preview Image'
+            }
+          >
             <Upload
               fileList={fileList}
               beforeUpload={file => {
@@ -294,6 +300,15 @@ export default function CourseEditPage() {
 
           <Form.Item name="paymentLink" label="Payment Link" className="w-full">
             <Input className="w-full" placeholder="Enter payment URL" />
+          </Form.Item>
+
+          <Form.Item
+            name="isPremium"
+            label="Premium Course"
+            valuePropName="checked"
+            className="w-full"
+          >
+            <Switch />
           </Form.Item>
 
           <Button type="primary" htmlType="submit">

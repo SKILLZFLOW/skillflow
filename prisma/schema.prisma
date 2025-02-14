@@ -60,6 +60,7 @@ model Subscription {
 
 /// @@allow('update', auth().globalRole == 'ADMIN')
 /// @@allow('update', auth().globalRole != 'ADMIN' && paymentLink == null)
+/// @@allow('create', !isPremium || auth().globalRole == 'ADMIN')
 /// @@allow('all', true)
 model Course {
   id            String       @id() @default(uuid())
@@ -67,7 +68,7 @@ model Course {
   description   String?
   previewUrl    String?
   contentUrl    String?
-  isPremium     Boolean
+  isPremium     Boolean      @default(false)
   price         String?
   paymentLink   String?
   sections      Section[]

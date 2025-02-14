@@ -173,10 +173,10 @@ export default function CoursesPage() {
                 actions={[
                   <Button
                     key="watch"
-                    type="primary"
-                    block
+                    type={""}
+                    block={true}
                     onClick={() => handleJoinCourse(course)}
-                    loading={isEnrolling}
+                    loading={false} style={{"backgroundColor":"#000000","color":"#ffffff"}}
                   >
                     Join Course
                   </Button>,
