@@ -120,8 +120,13 @@ export default function CoursesPage() {
               content.
             </Text>
             <div style={{ marginTop: '16px' }}>
-              <Button type="primary" size="large" onClick={handleUpgrade}>
-                Upgrade Now
+              <Button 
+                type="primary" 
+                size="large" 
+                onClick={handleUpgrade}
+                loading={isLoadingPremiumLink}
+              >
+                {isLoadingPremiumLink ? 'Loading...' : 'Upgrade Now'}
               </Button>
             </div>
           </Card>
