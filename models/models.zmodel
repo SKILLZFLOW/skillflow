@@ -195,6 +195,7 @@ model PremiumLink {
     updatedAt DateTime @updatedAt
 
     @@allow('all', auth().globalRole == 'ADMIN')
+    @@allow('read', true)
 }
 
           

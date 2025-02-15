@@ -180,6 +180,7 @@ model UserCourse {
 }
 
 /// @@allow('all', auth().globalRole == 'ADMIN')
+/// @@allow('read', true)
 model PremiumLink {
   id        String   @id() @default(uuid())
   url       String   @unique()

@@ -9,22 +9,12 @@ const { Title, Text, Paragraph } = Typography
 export default function UpgradePage() {
   const navigate = useNavigate()
   const { user } = useUserContext()
-  const { data: products, isLoading } = Api.billing.findManyProducts.useQuery(
-    {},
-  )
-  const { data: premiumLink, isLoading: isPremiumLoading, error: premiumError, refetch } = Api.premiumLink.findFirst.useQuery(undefined, {
-    retry: false,
-    onError: (error) => {
-      console.error('Premium link query failed:', error)
-      console.error('Error details:', JSON.stringify(error))
+  const { data: products, isLoading } = Api.billing.findManyProducts.useQuery({})
+  const { data: premiumLink, isLoading: isPremiumLoading, error: premiumError } = Api.premiumLink.findFirst.useQuery(undefined, {
+    onError: () => {
+      message.error('Failed to load premium payment link')
     }
   })
-
-  useEffect(() => {
-    if (premiumError) {
-      message.error('Failed to load premium payment link. Please try again later.')
-    }
-  }, [premiumError])
   const { mutateAsync: createPaymentLink } =
     Api.billing.createPaymentLink.useMutation()
 
@@ -100,17 +90,20 @@ export default function UpgradePage() {
               if (isPremiumLoading) return;
               if (premiumLink?.url) {
                 window.location.href = premiumLink.url;
+              } else {
+                message.warning('Payment link not available. Please try again later.');
+                refetch();
               }
             }}
             loading={isPremiumLoading}
             icon={<i className="las la-gem" />}
             style={{
-              background: '#1890ff',
+              background: '#1890ff', 
               borderColor: '#1890ff',
               padding: '0 40px',
             }}
           >
-            PAY NOW
+            {isPremiumLoading ? 'Loading...' : 'PAY NOW'}
           </Button>
         </div>
 
@@ -170,6 +163,9 @@ export default function UpgradePage() {
                         if (isPremiumLoading) return;
                         if (premiumLink?.url) {
                           window.location.href = premiumLink.url;
+                        } else {
+                          message.warning('Payment link not available. Please try again later.');
+                          refetch();
                         }
                       }}
                       loading={isPremiumLoading}
@@ -179,7 +175,7 @@ export default function UpgradePage() {
                         borderColor: '#1890ff',
                       }}
                     >
-                      Pay Now
+                      {isPremiumLoading ? 'Loading...' : 'Pay Now'}
                     </Button>
                     <Button
                       type="default"
