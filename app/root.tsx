@@ -16,10 +16,10 @@ import { AnalyticsProvider } from './plugins/analytics/client'
 
 export const meta: MetaFunction = () => {
   return [
-    { title: 'SKILLAFF' },
+    { title: 'SKILLFLOW' },
     {
       name: 'description',
-      content: 'SKILLAFF',
+      content: 'SKILLFLOW',
     },
   ]
 }

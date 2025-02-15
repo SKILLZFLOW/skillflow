@@ -1,6 +1,6 @@
 export const TemplateWelcome = `
 <Card.Header>
-  <h2>Welcome to SKILLAFF</h2>
+  <h2>Welcome to SKILLFLOW</h2>
   <hr />
 </Card.Header>
 
@@ -9,6 +9,6 @@ export const TemplateWelcome = `
 </Card.Body>
 
 <Card.Footer>
-  <p>Sent by SKILLAFF</p>
+  <p>Sent by SKILLFLOW</p>
 </Card.Footer>
   `.trim()

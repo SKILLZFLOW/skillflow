@@ -40,7 +40,7 @@ export const Logo: React.FC<Props> = ({
       />
       {isLabel && (
         <Typography.Title level={4} style={{ margin: '0px' }}>
-          SKILLAFF
+          SKILLFLOW
         </Typography.Title>
       )}
     </Flex>

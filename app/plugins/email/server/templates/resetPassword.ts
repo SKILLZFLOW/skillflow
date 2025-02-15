@@ -14,6 +14,6 @@ export const TemplateResetPassword = `
 </Card.Body>
 
 <Card.Footer>
-  <p>Sent by SKILLAFF</p>
+  <p>Sent by SKILLFLOW</p>
 </Card.Footer>
   `.trim()

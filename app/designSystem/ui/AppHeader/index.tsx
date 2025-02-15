@@ -9,7 +9,7 @@ type Props = {
 }
 
 export const AppHeader: React.FC<Props> = ({
-  title = 'SKILLAFF',
+  title = 'SKILLFLOW',
   description,
 }) => {
   return (
