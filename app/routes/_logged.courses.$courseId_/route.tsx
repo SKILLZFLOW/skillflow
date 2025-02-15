@@ -69,7 +69,7 @@ export default function CourseDetailsPage() {
             }}
           />
         </div>
-        <div>
+        <div className="px-5">
           <Title level={2}>{course?.title}</Title>
           <Text>{course?.description}</Text>
         </div>
