@@ -90,8 +90,8 @@ export default function LandingPage() {
     {
       title: `Basic Access`,
       description: `Perfect for beginners starting their digital skills journey`,
-      monthly: 2000,
-      yearly: 20000,
+      monthly: 0,
+      yearly: 0,
       features: [
         `Access to 5 basic courses`,
         `Community access`,
@@ -101,8 +101,8 @@ export default function LandingPage() {
     {
       title: `Pro Access`,
       description: `Most popular choice for serious learners`,
-      monthly: 5000,
-      yearly: 50000,
+      monthly: 3000,
+      yearly: 30000,
       features: [
         `Access to all courses`,
         `Priority support`,
@@ -110,18 +110,6 @@ export default function LandingPage() {
         `Certification`,
       ],
       highlight: true,
-    },
-    {
-      title: `Enterprise`,
-      description: `For businesses training multiple team members`,
-      monthly: 15000,
-      yearly: 150000,
-      features: [
-        `Team management`,
-        `Custom training`,
-        `Dedicated support`,
-        `Bulk discounts`,
-      ],
     },
   ]
 

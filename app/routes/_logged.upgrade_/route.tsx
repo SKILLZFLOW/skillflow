@@ -39,20 +39,15 @@ export default function UpgradePage() {
       description: 'Access to all premium courses and content',
     },
     {
-      icon: 'rocket',
-      title: 'Priority Support',
-      description: '24/7 dedicated customer support',
-    },
-    {
       icon: 'download',
-      title: 'Offline Access',
+      title: 'Offline Access', 
       description: 'Download courses for offline viewing',
     },
     {
       icon: 'certificate',
       title: 'Certificates',
       description: 'Earn certificates upon course completion',
-    },
+    }
   ]
 
   return (
@@ -113,8 +108,9 @@ export default function UpgradePage() {
               <Text>Loading available plans...</Text>
             </Col>
           ) : (
-            products?.map((product, index) => (
-              <Col xs={24} sm={12} md={8} key={index}>
+            products?.filter(product => product.name !== 'Enterprise')
+              .map((product, index) => (
+              <Col xs={24} sm={12} key={index}>
                 <Card
                   title={
                     <Title level={3} style={{ textAlign: 'center', margin: 0 }}>
@@ -125,9 +121,8 @@ export default function UpgradePage() {
                 >
                   <div style={{ textAlign: 'center', marginBottom: 24 }}>
                     <Title level={2} style={{ margin: 0 }}>
-                      XAF {product.price.toString()}
+                      {product.name === 'Basic' ? 'Free' : 'XAF 3000/month'}
                     </Title>
-                    <Text type="secondary">{product.interval}</Text>
                   </div>
                   <Paragraph style={{ minHeight: 80 }}>
                     {product.description}

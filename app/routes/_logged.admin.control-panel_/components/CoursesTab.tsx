@@ -19,19 +19,26 @@ export default function CoursesTab() {
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<string | null>(null)
 
-  const { data: courses, isLoading, refetch } = Api.course.findMany.useQuery({
+  const {
+    data: courses,
+    isLoading,
+    refetch,
+  } = Api.course.findMany.useQuery({
     where: {
       AND: [
-        typeFilter === 'premium' ? { isPremium: true } : 
-        typeFilter === 'free' ? { isPremium: false } : {},
+        typeFilter === 'premium'
+          ? { isPremium: true }
+          : typeFilter === 'free'
+          ? { isPremium: false }
+          : {},
         {
           OR: [
             { title: { contains: searchQuery } },
-            { description: { contains: searchQuery } }
-          ]
-        }
-      ]
-    }
+            { description: { contains: searchQuery } },
+          ],
+        },
+      ],
+    },
   })
   const { mutateAsync: createCourse } = Api.course.create.useMutation()
   const { mutateAsync: updateCourse } = Api.course.update.useMutation()
@@ -94,7 +101,7 @@ export default function CoursesTab() {
     },
     {
       title: 'Price',
-      dataIndex: 'price', 
+      dataIndex: 'price',
       key: 'price',
       render: (price: string) => `XAF ${price}`,
     },
@@ -147,7 +154,7 @@ export default function CoursesTab() {
           options={[
             { label: 'All', value: null },
             { label: 'Free', value: 'free' },
-            { label: 'Premium', value: 'premium' }
+            { label: 'Premium', value: 'premium' },
           ]}
         />
       </div>
