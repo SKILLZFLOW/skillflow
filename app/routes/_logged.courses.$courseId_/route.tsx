@@ -1,9 +1,18 @@
+import { useUserContext } from '@/core/context'
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
 import { useNavigate, useParams } from '@remix-run/react'
-import { Button, Card, Flex, List, message, Modal, Spin, Typography } from 'antd'
+import {
+  Button,
+  Card,
+  Flex,
+  List,
+  message,
+  Modal,
+  Spin,
+  Typography,
+} from 'antd'
 import { useState } from 'react'
-import { useUserContext } from '@/core/context'
 import { ImageOptimizedClient } from '~/plugins/image-optimize/client'
 
 const { Title, Text } = Typography
@@ -15,10 +24,15 @@ export default function CourseDetailsPage() {
   const [isDropModalVisible, setIsDropModalVisible] = useState(false)
   const [isDropLoading, setIsDropLoading] = useState(false)
   const { mutateAsync: dropCourse } = Api.userCourse.delete.useMutation()
-  const { data: enrollment, isLoading: isEnrollmentLoading } = Api.userCourse.findFirst.useQuery({
-    where: { courseId, userId: user.id }
-  })
-  const { data: course, isLoading, isLoading: isCourseLoading } = Api.course.findUnique.useQuery({
+  const { data: enrollment, isLoading: isEnrollmentLoading } =
+    Api.userCourse.findFirst.useQuery({
+      where: { courseId, userId: user.id },
+    })
+  const {
+    data: course,
+    isLoading,
+    isLoading: isCourseLoading,
+  } = Api.course.findUnique.useQuery({
     where: { id: courseId },
     include: { sections: { include: { videos: true } } },
   })
@@ -35,7 +49,7 @@ export default function CourseDetailsPage() {
 
   return (
     <PageLayout layout="full-width">
-      <div className="mx-5 mt-5">
+      <div className="mt-5">
         <div>
           <ImageOptimizedClient.Img
             src={course?.previewUrl}
@@ -65,28 +79,34 @@ export default function CourseDetailsPage() {
           dataSource={course?.sections?.sort((a, b) => a.order - b.order)}
           renderItem={section => (
             <List.Item>
-              <Card title={section.title} style={{ marginBottom: '12px' }}>
+              <Card title={section.title}>
                 <List
                   dataSource={section.videos?.sort((a, b) => a.order - b.order)}
                   renderItem={video => (
                     <List.Item>
-                      <Card type="inner" title={video.title} style={{ marginBottom: '8px' }}>
-                        <div className="mt-4">
-                          <iframe
-                            src={video.embedLink.replace(
-                              /(youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/,
-                              'youtube.com/embed/$2',
-                            )}
-                            width="100%"
-                            height="480px"
-                            frameBorder="0"
-                            style={{ maxWidth: '100%' }}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                          />
+                        <div>
+                          <Title level={5}>{video.title}</Title>
+                          <div className="mt-4">
+                            <iframe
+                              src={video.embedLink.replace(
+                                /(youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/,
+                                'youtube.com/embed/$2',
+                              )}
+                              style={{
+                                width: '100vw',
+                                height: '56.25vw',
+                                maxHeight: '90vh',
+                                margin: '0 -24px',
+                                position: 'relative',
+                                zIndex: 1
+                              }}
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                          <Text className="mt-4">{video.description}</Text>
                         </div>
-                        <Text className="mt-4">{video.description}</Text>
-                      </Card>
                     </List.Item>
                   )}
                 />
@@ -121,7 +141,9 @@ export default function CourseDetailsPage() {
           } catch (error) {
             console.error('Drop course error:', error)
             if (error.code === 'NOT_FOUND') {
-              message.error('Course enrollment not found. The course may have already been dropped.')
+              message.error(
+                'Course enrollment not found. The course may have already been dropped.',
+              )
             } else {
               message.error(error?.message || 'Failed to drop course')
             }
