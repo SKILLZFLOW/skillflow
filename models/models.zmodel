@@ -185,6 +185,7 @@ model UserCourse {
     updatedAt DateTime @updatedAt
 
     @@allow('all', true)
+    @@unique([userId, courseId])
 }
 
 model PremiumLink {
@@ -196,4 +197,4 @@ model PremiumLink {
     @@allow('all', auth().globalRole == 'ADMIN')
 }
 
-        
+          

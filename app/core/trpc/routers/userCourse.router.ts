@@ -89,14 +89,24 @@ export const UserCourseRouter = Trpc.createRouter({
       }
 
       // Create enrollment
-      const enrollment = await ctx.database.userCourse.create({
-        data: {
-          courseId: input.courseId,
-          userId: input.userId,
-        },
-      })
+      try {
+        const enrollment = await ctx.database.userCourse.create({
+          data: {
+            courseId: input.courseId,
+            userId: input.userId,
+          },
+        })
 
-      return enrollment
+        return enrollment
+      } catch (error) {
+        if (error.code === 'P2002') {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: 'You are already enrolled in this course',
+          })
+        }
+        throw error
+      }
     }),
   delete: Trpc.procedure
     .input(

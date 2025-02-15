@@ -84,29 +84,29 @@ export default function CourseDetailsPage() {
                   dataSource={section.videos?.sort((a, b) => a.order - b.order)}
                   renderItem={video => (
                     <List.Item>
-                        <div>
-                          <Title level={5}>{video.title}</Title>
-                          <div className="mt-4">
-                            <iframe
-                              src={video.embedLink.replace(
-                                /(youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/,
-                                'youtube.com/embed/$2',
-                              )}
-                              style={{
-                                width: '100vw',
-                                height: '56.25vw',
-                                maxHeight: '90vh',
-                                margin: '0 -24px',
-                                position: 'relative',
-                                zIndex: 1
-                              }}
-                              frameBorder="0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          </div>
-                          <Text className="mt-4">{video.description}</Text>
+                      <div>
+                        <Title level={5}>{video.title}</Title>
+                        <div className="mt-4">
+                          <iframe
+                            src={video.embedLink.replace(
+                              /(youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/,
+                              'youtube.com/embed/$2',
+                            )}
+                            style={{
+                              width: '100vw',
+                              height: '56.25vw',
+                              maxHeight: '90vh',
+                              margin: '0 -24px',
+                              position: 'relative',
+                              zIndex: 1,
+                            }}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
                         </div>
+                        <Text className="mt-4">{video.description}</Text>
+                      </div>
                     </List.Item>
                   )}
                 />

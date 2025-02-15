@@ -74,7 +74,7 @@ export default function CoursesPage() {
       } else if (error.code === 'FORBIDDEN') {
         message.error('Premium subscription required for course enrollment')
       } else {
-        message.error('Failed to join course. Please try again.')
+        message.error('You are already enrolled in this course')
       }
     } finally {
       setIsEnrolling(false)
@@ -173,10 +173,11 @@ export default function CoursesPage() {
                 actions={[
                   <Button
                     key="watch"
-                    type={""}
+                    type={''}
                     block={true}
                     onClick={() => handleJoinCourse(course)}
-                    loading={false} style={{"backgroundColor":"#000000","color":"#ffffff"}}
+                    loading={isEnrolling}
+                    style={{ backgroundColor: '#000000', color: '#ffffff' }}
                   >
                     Join Course
                   </Button>,
