@@ -28,6 +28,12 @@ export default function SettingsPage() {
     include: { socialAccounts: true },
   })
 
+  const { data: affiliateLink, isLoading: isLoadingAffiliateLink, error: affiliateLinkError } = Api.affiliateLink.findFirst.useQuery(undefined, {
+    onError: () => {
+      message.error('Failed to load affiliate link')
+    }
+  })
+
   const { mutateAsync: updateUser } = Api.user.update.useMutation()
   const { mutateAsync: createSocialAccount } =
     Api.socialAccount.create.useMutation()
@@ -124,9 +130,15 @@ export default function SettingsPage() {
               }
             >
               <div style={{ marginBottom: '16px' }}>
-                <Typography.Text>Name: <Typography.Text strong>{userData?.name}</Typography.Text></Typography.Text>
+                <Typography.Text>
+                  Name:{' '}
+                  <Typography.Text strong>{userData?.name}</Typography.Text>
+                </Typography.Text>
                 <br />
-                <Typography.Text>Email: <Typography.Text strong>{userData?.email}</Typography.Text></Typography.Text>
+                <Typography.Text>
+                  Email:{' '}
+                  <Typography.Text strong>{userData?.email}</Typography.Text>
+                </Typography.Text>
               </div>
               <Form
                 form={form}
@@ -230,6 +242,35 @@ export default function SettingsPage() {
                     </div>
                   )
                 })}
+              </div>
+            </Card>
+          </Col>
+
+          <Col xs={24}>
+            <Card
+              title={
+                <>
+                  <i className="las la-hand-holding-usd"></i> Affiliate Program
+                </>
+              }
+              style={{ marginTop: 24 }}
+            >
+              <Text>Earn 50% commission on every referral</Text>
+              <div style={{ marginTop: 16 }}>
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    if (isLoadingAffiliateLink) return;
+                    if (affiliateLink?.url) {
+                      window.location.href = affiliateLink.url;
+                    } else {
+                      message.error('Affiliate link not available. Please try again later.');
+                    }
+                  }}
+                  loading={isLoadingAffiliateLink}
+                >
+                  Become An Affiliate to earn
+                </Button>
               </div>
             </Card>
           </Col>

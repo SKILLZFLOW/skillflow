@@ -13,6 +13,7 @@ import createSocialAccountRouter from "./SocialAccount.router";
 import createSkillFeedVideoRouter from "./SkillFeedVideo.router";
 import createUserCourseRouter from "./UserCourse.router";
 import createPremiumLinkRouter from "./PremiumLink.router";
+import createAffiliateLinkRouter from "./AffiliateLink.router";
 import { ClientType as UserClientType } from "./User.router";
 import { ClientType as SubscriptionClientType } from "./Subscription.router";
 import { ClientType as CourseClientType } from "./Course.router";
@@ -25,6 +26,7 @@ import { ClientType as SocialAccountClientType } from "./SocialAccount.router";
 import { ClientType as SkillFeedVideoClientType } from "./SkillFeedVideo.router";
 import { ClientType as UserCourseClientType } from "./UserCourse.router";
 import { ClientType as PremiumLinkClientType } from "./PremiumLink.router";
+import { ClientType as AffiliateLinkClientType } from "./AffiliateLink.router";
 
 export type BaseConfig = AnyRootConfig;
 
@@ -61,6 +63,7 @@ export function createRouter<Config extends BaseConfig>(router: RouterFactory<Co
         skillFeedVideo: createSkillFeedVideoRouter(router, procedure),
         userCourse: createUserCourseRouter(router, procedure),
         premiumLink: createPremiumLinkRouter(router, procedure),
+        affiliateLink: createAffiliateLinkRouter(router, procedure),
     }
     );
 }
@@ -78,4 +81,5 @@ export interface ClientType<AppRouter extends AnyRouter> {
     skillFeedVideo: SkillFeedVideoClientType<AppRouter>;
     userCourse: UserCourseClientType<AppRouter>;
     premiumLink: PremiumLinkClientType<AppRouter>;
+    affiliateLink: AffiliateLinkClientType<AppRouter>;
 }
