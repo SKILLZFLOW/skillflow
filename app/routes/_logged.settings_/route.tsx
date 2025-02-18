@@ -1,7 +1,11 @@
 import { useUserContext } from '@/core/context'
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
-import { YoutubeFilled, FacebookFilled, TikTokOutlined } from '@ant-design/icons'
+import {
+  FacebookFilled,
+  TikTokOutlined,
+  YoutubeFilled,
+} from '@ant-design/icons'
 import {
   Button,
   Card,
@@ -119,6 +123,11 @@ export default function SettingsPage() {
                 </>
               }
             >
+              <div style={{ marginBottom: '16px' }}>
+                <Typography.Text>Name: <Typography.Text strong>{userData?.name}</Typography.Text></Typography.Text>
+                <br />
+                <Typography.Text>Email: <Typography.Text strong>{userData?.email}</Typography.Text></Typography.Text>
+              </div>
               <Form
                 form={form}
                 layout="vertical"
@@ -177,11 +186,29 @@ export default function SettingsPage() {
                     >
                       <Text style={{ display: 'flex', alignItems: 'center' }}>
                         {platform === 'YouTube' ? (
-                          <YoutubeFilled style={{ fontSize: '16px', color: '#FF0000', marginRight: '5px' }} />
+                          <YoutubeFilled
+                            style={{
+                              fontSize: '16px',
+                              color: '#FF0000',
+                              marginRight: '5px',
+                            }}
+                          />
                         ) : platform === 'TikTok' ? (
-                          <TikTokOutlined style={{ fontSize: '16px', color: '#000000', marginRight: '5px' }} />
+                          <TikTokOutlined
+                            style={{
+                              fontSize: '16px',
+                              color: '#000000',
+                              marginRight: '5px',
+                            }}
+                          />
                         ) : (
-                          <FacebookFilled style={{ fontSize: '16px', color: '#1877F2', marginRight: '5px' }} />
+                          <FacebookFilled
+                            style={{
+                              fontSize: '16px',
+                              color: '#1877F2',
+                              marginRight: '5px',
+                            }}
+                          />
                         )}
                         {platform}
                       </Text>
