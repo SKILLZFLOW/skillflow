@@ -64,14 +64,6 @@ export default function CourseEditPage() {
     }
   }, [])
 
-  const isYoutubeUrl = (url: string) => {
-    return url.includes('youtube.com/watch?v=') || url.includes('youtu.be/')
-  }
-
-  const isTiktokUrl = (url: string) => {
-    return url.includes('tiktok.com')
-  }
-
   const { mutateAsync: upload } = useUploadPublic()
   const {
     data: course,
@@ -454,14 +446,7 @@ export default function CourseEditPage() {
             <Form.Item
               name="embedLink"
               label="Embed Link"
-              rules={[
-                { required: true },
-                {
-                  pattern:
-                    /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=[\w-]+|youtu\.be\/[\w-]+(\?si=[\w-]+)?|tiktok\.com\/@[\w-]+\/video\/[\d]+)$/,
-                  message: 'Please enter a valid YouTube or TikTok URL',
-                },
-              ]}
+              rules={[{ required: true, message: 'Please input video link!' }]}
             >
               <Input />
             </Form.Item>
