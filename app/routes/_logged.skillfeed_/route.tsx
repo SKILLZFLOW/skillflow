@@ -1,6 +1,6 @@
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
-import { Typography, Button } from 'antd'
+import { Button, Typography } from 'antd'
 
 import { useEffect, useState } from 'react'
 
@@ -10,7 +10,11 @@ const detectUrls = (text: string) => {
   const urlRegex = /(https?:\/\/[^\s]+)/g
   return text.split(urlRegex).map((part, i) => {
     if (part.match(urlRegex)) {
-      return <Link key={i} href={part} target="_blank">{part}</Link>
+      return (
+        <Link key={i} href={part} target="_blank">
+          {part}
+        </Link>
+      )
     }
     return part
   })
@@ -26,7 +30,9 @@ const isTiktokUrl = (url: string) => {
 
 export default function HomePage() {
   const { data: videos } = Api.skillFeedVideo.findMany.useQuery()
-  const [expandedDescriptions, setExpandedDescriptions] = useState<{[key: string]: boolean}>({})
+  const [expandedDescriptions, setExpandedDescriptions] = useState<{
+    [key: string]: boolean
+  }>({})
 
   const toggleDescription = (videoId: string) => {
     setExpandedDescriptions(prev => ({ ...prev, [videoId]: !prev[videoId] }))
@@ -81,14 +87,14 @@ export default function HomePage() {
             <div className="mt-2 bg-gray-200 p-4 rounded-lg">
               <Title level={4}>{video.title}</Title>
               <Paragraph
-                ellipsis={expandedDescriptions[video.id] ? false : {rows: 2}}
+                ellipsis={expandedDescriptions[video.id] ? false : { rows: 2 }}
                 onClick={() => toggleDescription(video.id)}
               >
                 {detectUrls(video.description)}
               </Paragraph>
               {expandedDescriptions[video.id] && (
                 <Button
-                  type='link'
+                  type="link"
                   onClick={() => toggleDescription(video.id)}
                   style={{ padding: 0, marginTop: '8px' }}
                 >
