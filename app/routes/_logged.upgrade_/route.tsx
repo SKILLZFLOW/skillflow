@@ -10,7 +10,7 @@ export default function UpgradePage() {
   const navigate = useNavigate()
   const { user } = useUserContext()
   const { data: products, isLoading } = Api.billing.findManyProducts.useQuery({})
-  const { data: premiumLink, isLoading: isPremiumLoading, error: premiumError } = Api.premiumLink.findFirst.useQuery(undefined, {
+  const { data: premiumLink, isLoading: isPremiumLoading, error: premiumError, refetch } = Api.premiumLink.findFirst.useQuery(undefined, {
     onError: () => {
       message.error('Failed to load premium payment link')
     }

@@ -66,6 +66,13 @@ export const NavigationLayout: React.FC<Props> = ({ children }) => {
       onClick: () => goTo('/my-courses'),
     },
     {
+      key: '/wallet',
+      label: 'Wallet',
+      position: 'topbar',
+      icon: <i className='las la-wallet'></i>,
+      onClick: () => goTo('/wallet')
+    },
+    {
       key: '/settings',
       label: 'Settings',
       position: 'topbar',

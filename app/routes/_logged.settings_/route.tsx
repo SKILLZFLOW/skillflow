@@ -2,6 +2,7 @@ import { useUserContext } from '@/core/context'
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
 import {
+  CopyOutlined,
   FacebookFilled,
   TikTokOutlined,
   YoutubeFilled,
@@ -15,6 +16,7 @@ import {
   message,
   Row,
   Space,
+  Tooltip,
   Typography,
 } from 'antd'
 const { Title, Text } = Typography
@@ -28,10 +30,14 @@ export default function SettingsPage() {
     include: { socialAccounts: true },
   })
 
-  const { data: affiliateLink, isLoading: isLoadingAffiliateLink, error: affiliateLinkError } = Api.affiliateLink.findFirst.useQuery(undefined, {
+  const {
+    data: affiliateLink,
+    isLoading: isLoadingAffiliateLink,
+    error: affiliateLinkError,
+  } = Api.affiliateLink.findFirst.useQuery(undefined, {
     onError: () => {
       message.error('Failed to load affiliate link')
-    }
+    },
   })
 
   const { mutateAsync: updateUser } = Api.user.update.useMutation()
@@ -39,6 +45,9 @@ export default function SettingsPage() {
     Api.socialAccount.create.useMutation()
   const { mutateAsync: deleteSocialAccount } =
     Api.socialAccount.delete.useMutation()
+
+  const { mutateAsync: processWithdrawal } =
+    Api.billing.processWithdrawal.useMutation()
 
   const { mutateAsync: logout } = Api.authentication.logout.useMutation({
     onSuccess: data => {
@@ -109,6 +118,22 @@ export default function SettingsPage() {
       refetch()
     } catch (error) {
       message.error('Failed to disconnect account')
+    }
+  }
+
+  const handlePayoutSettingsSubmit = async (values: any) => {
+    try {
+      await processWithdrawal({
+        bankAccount: {
+          accountNumber: values.accountNumber,
+          bankCode: values.bankCode,
+        },
+        amount: '0',
+      })
+      message.success('Payout settings saved successfully')
+      form.resetFields(['accountNumber', 'bankCode'])
+    } catch (error) {
+      message.error('Failed to save payout settings')
     }
   }
 
@@ -255,23 +280,92 @@ export default function SettingsPage() {
               }
               style={{ marginTop: 24 }}
             >
-              <Text>Earn 50% commission on every referral</Text>
+              <Text>Earn 50% commission on every referral!</Text>
               <div style={{ marginTop: 16 }}>
-                <Button
-                  type="primary"
-                  onClick={() => {
-                    if (isLoadingAffiliateLink) return;
-                    if (affiliateLink?.url) {
-                      window.location.href = affiliateLink.url;
-                    } else {
-                      message.error('Affiliate link not available. Please try again later.');
-                    }
-                  }}
-                  loading={isLoadingAffiliateLink}
-                >
-                  Become An Affiliate to earn
-                </Button>
+                {affiliateLink?.url ? (
+                  <Space>
+                    <Input
+                      value={`${affiliateLink.url}?ref=${
+                        user?.id
+                      }&tx=${Date.now()}`}
+                      readOnly
+                    />
+                    <Tooltip title="Copy affiliate link">
+                      <Button
+                        icon={<CopyOutlined />}
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            `${affiliateLink.url}?ref=${
+                              user?.id
+                            }&tx=${Date.now()}`,
+                          )
+                          message.success('Affiliate link copied to clipboard!')
+                        }}
+                      />
+                    </Tooltip>
+                  </Space>
+                ) : (
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      if (isLoadingAffiliateLink) return
+                      message.error(
+                        'Affiliate link not available. Please try again later.',
+                      )
+                    }}
+                    loading={isLoadingAffiliateLink}
+                  >
+                    Become An Affiliate to earn
+                  </Button>
+                )}
               </div>
+            </Card>
+          </Col>
+
+          <Col xs={24}>
+            <Card
+              title={
+                <>
+                  <i className="las la-money-check"></i> Payout Settings
+                </>
+              }
+              style={{ marginTop: 24 }}
+            >
+              <Form layout="vertical" onFinish={handlePayoutSettingsSubmit}>
+                <Form.Item
+                  label="Bank Account Number"
+                  name="accountNumber"
+                  rules={[
+                    {
+                      required: true,
+                      message: 'Bank account number is required',
+                    },
+                    { pattern: /^\d+$/, message: 'Please enter numbers only' },
+                  ]}
+                >
+                  <Input placeholder="Enter your bank account number" />
+                </Form.Item>
+
+                <Form.Item
+                  label="Bank Code"
+                  name="bankCode"
+                  rules={[
+                    { required: true, message: 'Bank code is required' },
+                    {
+                      pattern: /^[a-zA-Z0-9]+$/,
+                      message: 'Please enter valid bank code',
+                    },
+                  ]}
+                >
+                  <Input placeholder="Enter your bank code" />
+                </Form.Item>
+
+                <Form.Item>
+                  <Button type="primary" htmlType="submit">
+                    <i className="las la-save"></i> Save Payout Settings
+                  </Button>
+                </Form.Item>
+              </Form>
             </Card>
           </Col>
         </Row>

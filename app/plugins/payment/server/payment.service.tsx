@@ -1,39 +1,30 @@
 import { User } from '@prisma/client'
-import { Payment, Product, Subscription, WebhookResponse } from './payment.type'
+import { Payment, Product, Subscription } from './payment.type'
+import { FlutterwaveProvider } from './providers/flutterwave'
 import { Provider } from './providers/provider'
 
-class PlaceholderProvider implements Provider {
-  isActive(): boolean {
-    return true
-  }
-
-  async createCustomer(): Promise<string> {
-    throw new Error('Payment provider not implemented')
-  }
-
-  async createPaymentLink(): Promise<string> {
-    throw new Error('Payment provider not implemented')
-  }
-
-  async findManySubscriptions(): Promise<Subscription[]> {
-    return []
-  }
-
-  async findManyPayments(): Promise<Payment[]> {
-    return []
-  }
-
-  async findManyProducts(): Promise<Product[]> {
-    return []
-  }
-
-  async onPayment(): Promise<WebhookResponse> {
-    throw new Error('Payment provider not implemented')
-  }
+export interface BankAccount {
+  accountNumber: string // Remove optional
+  bankCode: string // Remove optional
+  accountName?: string // Keep optional
 }
 
-class Service {
-  private provider: Provider = new PlaceholderProvider()
+interface PaymentService {
+  getCustomerId(user: User): string
+  validateBankAccount(
+    customerId: string,
+    bankAccount: BankAccount,
+  ): Promise<void>
+  saveBankAccount(customerId: string, bankAccount: BankAccount): Promise<void>
+  withdrawFromWallet(options: {
+    customerId: string
+    amount: string
+    bankAccount: BankAccount
+  }): Promise<void>
+}
+
+class Service implements PaymentService {
+  private provider: Provider = new FlutterwaveProvider()
 
   isActive(): boolean {
     if (this.provider) {
@@ -43,8 +34,30 @@ class Service {
     return false
   }
 
-  getCustomerId(user: User): string | null {
-    return null
+  getCustomerId(user: User): string {
+    return user.email
+  }
+
+  async getWalletBalance(user: User): Promise<string> {
+    const wallet = await this.provider.getWalletBalance(
+      this.getCustomerId(user),
+    )
+    return wallet.balance
+  }
+
+  async depositToWallet(user: User, amount: string): Promise<boolean> {
+    return this.provider.depositToWallet({
+      customerId: this.getCustomerId(user),
+      amount,
+    })
+  }
+
+  async withdrawFromWallet(options: {
+    customerId: string
+    amount: string
+    bankAccount: BankAccount
+  }): Promise<void> {
+    await this.provider.withdrawFromWallet(options)
   }
 
   async findManyProducts(): Promise<Product[]> {
@@ -75,16 +88,18 @@ class Service {
     return this.provider.createPaymentLink(optionsPayment)
   }
 
-  async onPayment(body: Buffer, sig: string): Promise<WebhookResponse> {
-    return this.provider.onPayment(body, sig)
+  async validateBankAccount(
+    customerId: string,
+    bankAccount: BankAccount,
+  ): Promise<void> {
+    await this.provider.validateBankAccount(bankAccount)
   }
 
-  async createCustomer(customer: User): Promise<string> {
-    return this.provider.createCustomer({
-      name: customer.name ?? customer.email,
-
-      email: customer.email,
-    })
+  async saveBankAccount(
+    customerId: string,
+    bankAccount: BankAccount,
+  ): Promise<void> {
+    await this.provider.saveBankAccount(customerId, bankAccount)
   }
 }
 

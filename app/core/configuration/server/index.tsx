@@ -16,6 +16,8 @@ export const trpcRouter = Trpc.createRouter({
 
     const variablesPublic: PublicVariables = {
       authenticationProviders,
+      FLW_PUBLIC_KEY: process.env.FLW_PUBLIC_KEY,
+      FLW_SECRET_KEY: process.env.FLW_SECRET_KEY,
     }
 
     for (const [key, value] of Object.entries(variables)) {

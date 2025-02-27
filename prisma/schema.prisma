@@ -43,6 +43,7 @@ model User {
   transactions        Transaction[]   @relation("user")
   socialAccounts      SocialAccount[] @relation("user")
   enrolledCourses     UserCourse[]
+  payoutSettings      PayoutSettings? @relation("payoutSettings")
 }
 
 /// @@allow('all', true)
@@ -195,4 +196,19 @@ model AffiliateLink {
   url       String   @unique()
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
+}
+
+/// @@allow('create', auth().id == userId)
+/// @@allow('read', auth().id == userId || auth().globalRole == 'ADMIN')
+/// @@allow('update', auth().id == userId || auth().globalRole == 'ADMIN')
+/// @@allow('delete', auth().id == userId || auth().globalRole == 'ADMIN')
+model PayoutSettings {
+  id            String   @id() @default(uuid())
+  accountNumber String
+  bankCode      String
+  verified      Boolean  @default(false)
+  userId        String   @unique()
+  user          User     @relation(fields: [userId], references: [id], name: "payoutSettings")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt()
 }
