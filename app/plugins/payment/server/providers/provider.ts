@@ -10,6 +10,7 @@ export type ProviderCreatePaymentLinkOptions = {
   productId: string
   metadata?: Record<string, string>
   urlRedirection?: string
+  phoneNumber: string
 }
 
 export interface Provider {
@@ -20,22 +21,15 @@ export interface Provider {
   findManyProducts(): Promise<Product[]>
   onPayment(body: Buffer, sig: string): Promise<WebhookResponse>
   isActive(): boolean
-  validateBankAccount(bankAccount: {
-    accountNumber: string
-    bankCode: string
-  }): Promise<{ accountNumber: string; bankCode: string; accountName?: string }>
-  saveBankAccount(
-    customerId: string,
-    bankAccount: { accountNumber: string; bankCode: string },
-  ): Promise<void>
   withdrawFromWallet(options: {
     customerId: string
     amount: string
-    bankAccount: { accountNumber: string; bankCode: string }
+    phoneNumber: string
   }): Promise<boolean>
   getWalletBalance(customerId: string): Promise<{ balance: string }>
   depositToWallet(options: {
     customerId: string
     amount: string
+    phoneNumber: string
   }): Promise<boolean>
 }

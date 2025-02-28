@@ -4,11 +4,6 @@ import { Payment, Product, Subscription } from '../payment.type'
 import { Provider, ProviderCreatePaymentLinkOptions } from './provider'
 
 export const COMMISSION_PERCENTAGE = 0.5
-export interface BankAccount {
-  accountNumber: string
-  bankCode: string
-  accountName?: string
-}
 
 export class FlutterwaveProvider implements Provider {
   private flw: Flutterwave
@@ -16,6 +11,28 @@ export class FlutterwaveProvider implements Provider {
   constructor() {
     const publicKey = process.env.FLW_PUBLIC_KEY
     const secretKey = process.env.FLW_SECRET_KEY
+    const encryptionKey = process.env.FLW_ENCRYPTION_KEY
+
+    if (!publicKey || !secretKey || !encryptionKey) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Missing required Flutterwave configuration keys',
+      })
+    }
+
+    if (!publicKey.startsWith('FLWPUBK-')) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Invalid Flutterwave public key format',
+      })
+    }
+
+    if (!secretKey.startsWith('FLWSECK-')) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Invalid Flutterwave secret key format',
+      })
+    }
 
     this.flw = new Flutterwave(publicKey, secretKey)
   }
@@ -39,19 +56,28 @@ export class FlutterwaveProvider implements Provider {
     const payload = {
       tx_ref: `tx-${Date.now()}`,
       amount: '100', // Get from product
-      currency: 'NGN',
+      currency: 'XAF',
       redirect_url: options.urlRedirection || 'https://example.com',
       customer: {
         email: options.customerId,
       },
       meta: options.metadata,
       customizations: {
-        title: 'Payment',
-        description: 'Payment for product',
+        title: 'Paiement Mobile Money',
+        description: 'Paiement par Mobile Money',
       },
+      payment_type: 'mobilemoneyfr',
+      country: 'CM',
+      phone_number: options.phoneNumber
     }
 
-    const response = await this.flw.Charge.create(payload)
+    const response = await this.flw.MobileMoney.charge(payload)
+    if (!response.status || response.status !== 'success') {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Le paiement Mobile Money a échoué. Veuillez réessayer.',
+      })
+    }
     return response.data.link
   }
 
@@ -102,86 +128,6 @@ export class FlutterwaveProvider implements Provider {
     return commission.toString()
   }
 
-  async validateBankAccount(bankAccount: BankAccount): Promise<BankAccount> {
-    try {
-      const response = await this.flw.Bank.validate({
-        account_number: bankAccount.accountNumber,
-        account_bank: bankAccount.bankCode,
-      })
-
-      if (!response.status || response.status !== 'success') {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Invalid bank account details',
-        })
-      }
-
-      return {
-        ...bankAccount,
-        accountName: response.data.account_name,
-      }
-    } catch (error) {
-      throw new TRPCError({
-        code: 'BAD_REQUEST',
-        message: error.message || 'Failed to validate bank account',
-      })
-    }
-  }
-
-  async saveBankAccount(
-    customerId: string,
-    bankAccount: BankAccount,
-  ): Promise<void> {
-    try {
-      const validatedAccount = await this.validateBankAccount(bankAccount)
-      await this.flw.Bank.create({
-        account_bank: validatedAccount.bankCode,
-        account_number: validatedAccount.accountNumber,
-        email: customerId,
-      })
-    } catch (error) {
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: error.message || 'Failed to save bank account',
-      })
-    }
-  }
-
-  async withdrawFromWallet(options: {
-    customerId: string
-    amount: string
-    bankAccount: BankAccount
-  }): Promise<boolean> {
-    try {
-      const validatedAccount = await this.validateBankAccount(
-        options.bankAccount,
-      )
-
-      const transfer = await this.flw.Transfer.create({
-        account_bank: validatedAccount.bankCode,
-        account_number: validatedAccount.accountNumber,
-        amount: options.amount,
-        currency: 'NGN',
-        reference: `transfer-${Date.now()}`,
-        callback_url: process.env.FLUTTERWAVE_WEBHOOK_URL,
-        debit_currency: 'NGN',
-      })
-
-      if (!transfer.status || transfer.status !== 'success') {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Withdrawal failed',
-        })
-      }
-
-      return true
-    } catch (error) {
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: error.message || 'Failed to process withdrawal',
-      })
-    }
-  }
 
   async getWalletBalance(customerId: string): Promise<{ balance: string }> {
     // Flutterwave doesn't have direct wallet balance endpoint
@@ -191,15 +137,48 @@ export class FlutterwaveProvider implements Provider {
   async depositToWallet(options: {
     customerId: string
     amount: string
+    phoneNumber: string
   }): Promise<boolean> {
-    // Use existing Charge.create for deposits
     const payload = {
-      tx_ref: `deposit-${Date.now()}`,
+      tx_ref: `withdrawal-${Date.now()}`,
       amount: options.amount,
-      currency: 'NGN',
+      currency: 'XAF',
       customer: { email: options.customerId },
+      payment_type: 'mobilemoneyfr',
+      country: 'CM',
+      phone_number: options.phoneNumber
     }
-    await this.flw.Charge.create(payload)
+    const response = await this.flw.MobileMoney.charge(payload)
+    if (!response.status || response.status !== 'success') {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Le dépôt Mobile Money a échoué. Veuillez réessayer.',
+      })
+    }
+    return true
+  }
+
+  async withdrawFromWallet(options: {
+    customerId: string
+    amount: string
+    phoneNumber: string
+  }): Promise<boolean> {
+    const payload = {
+      tx_ref: `withdrawal-${Date.now()}`,
+      amount: options.amount,
+      currency: 'XAF',
+      customer: { email: options.customerId },
+      payment_type: 'mobilemoneyfr',
+      country: 'CM',
+      phone_number: options.phoneNumber
+    }
+    const response = await this.flw.MobileMoney.charge(payload)
+    if (!response.status || response.status !== 'success') {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Le retrait Mobile Money a échoué. Veuillez réessayer.',
+      })
+    }
     return true
   }
 }

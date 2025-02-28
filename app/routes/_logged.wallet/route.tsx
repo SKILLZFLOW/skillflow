@@ -17,8 +17,7 @@ import { useState } from 'react'
 
 interface WithdrawFormValues {
   amount: string
-  accountNumber: string
-  bankCode: string
+  phoneNumber: string
 }
 
 const { Title, Text } = Typography
@@ -44,8 +43,6 @@ export default function WalletPage() {
     Api.billing.initiateDeposit.useMutation()
   const { mutateAsync: processWithdrawal } =
     Api.billing.processWithdrawal.useMutation()
-  const { mutateAsync: validateBankAccount } =
-    Api.billing.validateBankAccount.useMutation()
 
   const handleDeposit = async (event: React.MouseEvent<HTMLElement>) => {
     try {
@@ -54,9 +51,9 @@ export default function WalletPage() {
       setIsDepositModalVisible(false)
       depositForm.resetFields()
       refetchWallet()
-      message.success('Deposit initiated successfully')
+      message.success('Mobile Money deposit initiated successfully')
     } catch (error) {
-      message.error('Failed to initiate deposit')
+      message.error('Failed to initiate Mobile Money deposit')
     }
   }
 
@@ -64,13 +61,10 @@ export default function WalletPage() {
     try {
       await processWithdrawal({
         amount: values.amount,
-        bankAccount: {
-          accountNumber: values.accountNumber,
-          bankCode: values.bankCode
-        }
+        phoneNumber: values.phoneNumber
       })
 
-      message.success('Withdrawal processed successfully')
+      message.success('Mobile Money withdrawal processed successfully')
       withdrawForm.resetFields()
       setIsWithdrawModalVisible(false)
       refetchWallet()
@@ -89,7 +83,7 @@ export default function WalletPage() {
       title: 'Amount',
       dataIndex: 'amount',
       key: 'amount',
-      render: (amount: string) => `NGN ${amount}`,
+      render: (amount: string) => `XAF ${amount}`,
     },
     {
       title: 'Status',
@@ -111,7 +105,7 @@ export default function WalletPage() {
           <Card>
             <Title level={3}>Wallet Balance</Title>
             <Text strong style={{ fontSize: 24 }}>
-              NGN {wallet?.balance || '0.00'}
+              XAF {wallet?.balance || '0.00'}
             </Text>
             <div style={{ marginTop: 24 }}>
               <Button
@@ -142,7 +136,7 @@ export default function WalletPage() {
       </Row>
 
       <Modal
-        title="Deposit Funds"
+        title="Mobile Money Deposit"
         open={isDepositModalVisible}
         onOk={handleDeposit}
         onCancel={() => setIsDepositModalVisible(false)}
@@ -156,11 +150,23 @@ export default function WalletPage() {
               { pattern: /^\d+$/, message: 'Please enter a valid amount' },
             ]}
           >
-            <Input prefix="NGN" />
+            <Input prefix="XAF" />
+          </Form.Item>
+          <Form.Item
+            name="phoneNumber"
+            label="Phone Number"
+            rules={[
+              { required: true, message: 'Please enter phone number' },
+              {
+                pattern: /^(237|\\+237)?[6-9][0-9]{8}$/,
+                message: 'Please enter a valid Cameroon phone number',
+              },
+            ]}
+          >
+            <Input addonBefore="+237" />
           </Form.Item>
         </Form>
       </Modal>
-
       <Modal
         title="Withdraw Funds"
         open={isWithdrawModalVisible}
@@ -179,30 +185,17 @@ export default function WalletPage() {
             <Input prefix="NGN" />
           </Form.Item>
           <Form.Item
-            name="accountNumber"
-            label="Account Number"
+            name="phoneNumber"
+            label="Phone Number"
             rules={[
-              { required: true, message: 'Please enter account number' },
+              { required: true, message: 'Please enter phone number' },
               {
-                pattern: /^\d+$/,
-                message: 'Account number must contain only digits',
+                pattern: /^(237|\\+237)?[6-9][0-9]{8}$/,
+                message: 'Please enter a valid Cameroon phone number',
               },
             ]}
           >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="bankCode"
-            label="Bank Code"
-            rules={[
-              { required: true, message: 'Please enter bank code' },
-              {
-                pattern: /^[A-Z0-9]+$/,
-                message: 'Bank code must be alphanumeric',
-              },
-            ]}
-          >
-            <Input />
+            <Input addonBefore="+237" />
           </Form.Item>
         </Form>
       </Modal>

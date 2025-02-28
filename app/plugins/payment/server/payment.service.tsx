@@ -3,23 +3,12 @@ import { Payment, Product, Subscription } from './payment.type'
 import { FlutterwaveProvider } from './providers/flutterwave'
 import { Provider } from './providers/provider'
 
-export interface BankAccount {
-  accountNumber: string // Remove optional
-  bankCode: string // Remove optional
-  accountName?: string // Keep optional
-}
-
 interface PaymentService {
   getCustomerId(user: User): string
-  validateBankAccount(
-    customerId: string,
-    bankAccount: BankAccount,
-  ): Promise<void>
-  saveBankAccount(customerId: string, bankAccount: BankAccount): Promise<void>
   withdrawFromWallet(options: {
     customerId: string
     amount: string
-    bankAccount: BankAccount
+    phoneNumber: string
   }): Promise<void>
 }
 
@@ -45,17 +34,18 @@ class Service implements PaymentService {
     return wallet.balance
   }
 
-  async depositToWallet(user: User, amount: string): Promise<boolean> {
+  async depositToWallet(user: User, amount: string, phoneNumber: string): Promise<boolean> {
     return this.provider.depositToWallet({
       customerId: this.getCustomerId(user),
       amount,
+      phoneNumber
     })
   }
 
   async withdrawFromWallet(options: {
     customerId: string
     amount: string
-    bankAccount: BankAccount
+    phoneNumber: string
   }): Promise<void> {
     await this.provider.withdrawFromWallet(options)
   }
@@ -74,33 +64,19 @@ class Service implements PaymentService {
 
   async createPaymentLink(options: {
     user: User
-
     productId: string
     metadata?: Record<string, string>
     urlRedirection?: string
+    phoneNumber: string
   }): Promise<string> {
     const optionsPayment = {
       ...options,
-
       customerId: this.getCustomerId(options.user),
     }
 
     return this.provider.createPaymentLink(optionsPayment)
   }
 
-  async validateBankAccount(
-    customerId: string,
-    bankAccount: BankAccount,
-  ): Promise<void> {
-    await this.provider.validateBankAccount(bankAccount)
-  }
-
-  async saveBankAccount(
-    customerId: string,
-    bankAccount: BankAccount,
-  ): Promise<void> {
-    await this.provider.saveBankAccount(customerId, bankAccount)
-  }
 }
 
 class Singleton {

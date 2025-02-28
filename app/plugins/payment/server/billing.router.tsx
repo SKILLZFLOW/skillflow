@@ -3,16 +3,14 @@ import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { Trpc } from '~/core/trpc/base'
 import { PaymentService } from './payment.service'
-import { COMMISSION_PERCENTAGE, BankAccount } from './providers/flutterwave'
+import { COMMISSION_PERCENTAGE } from './providers/flutterwave'
 
 /**
  * @provider BillingApi
  * @description API for payment operations using Flutterwave
- * @function validateBankAccount - Validates bank account details
- * @function saveBankAccount - Saves validated bank account for future use
- * @function processWithdrawal - Processes withdrawal to saved bank account
+ * @function processWithdrawal - Processes withdrawal to mobile money
  * @function getWalletBalance - Gets current wallet balance
- * @function initiateDeposit - Initiates deposit to wallet
+ * @function initiateDeposit - Initiates deposit to wallet via mobile money
  * @usage `const api = Api.billing`
  */
 
@@ -36,7 +34,11 @@ export const BillingRouter = Trpc.createRouter({
     }),
 
   initiateDeposit: Trpc.procedure
-    .input(z.object({ amount: z.string() }))
+    .input(z.object({ 
+      amount: z.string(),
+      phoneNumber: z.string()
+        .regex(/^(237|\\+237)?[6-9][0-9]{8}$/, 'Veuillez entrer un numéro de téléphone Camerounais valide')
+    }))
     .mutation(async ({ ctx, input }) => {
       if (!PaymentService.isActive()) {
         throw new TRPCError({
@@ -50,85 +52,16 @@ export const BillingRouter = Trpc.createRouter({
         where: { id: userId },
       })
 
-      return PaymentService.depositToWallet(user, input.amount)
+      return PaymentService.depositToWallet(user, input.amount, input.phoneNumber)
     }),
 
-  validateBankAccount: Trpc.procedure
-    .input(
-      z.object({
-        bankAccount: z.object({
-          accountNumber: z
-            .string()
-            .regex(/^\d+$/, 'Account number must contain only digits')
-            .min(1),
-          bankCode: z
-            .string()
-            .regex(/^[A-Z0-9]+$/, 'Bank code must be alphanumeric')
-            .min(1)
-        }).strict()
-      }).required()
-    )
-    .mutation(async ({ ctx, input }) => {
-      if (!PaymentService.isActive()) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Payment provider not configured',
-        })
-      }
-
-      const userId = ctx.session?.user?.id
-      const user = await ctx.database.user.findFirstOrThrow({
-        where: { id: userId },
-      })
-
-      return PaymentService.validateBankAccount(user.id, input.bankAccount as BankAccount)
-    }),
-
-  saveBankAccount: Trpc.procedure
-    .input(
-      z.object({
-        bankAccount: z.object({
-          accountNumber: z
-            .string()
-            .regex(/^\d+$/, 'Account number must contain only digits')
-            .min(1),
-          bankCode: z
-            .string()
-            .regex(/^[A-Z0-9]+$/, 'Bank code must be alphanumeric')
-            .min(1)
-        }).strict()
-      }).required()
-    )
-    .mutation(async ({ ctx, input }) => {
-      if (!PaymentService.isActive()) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Payment provider not configured',
-        })
-      }
-
-      const userId = ctx.session?.user?.id
-      const user = await ctx.database.user.findFirstOrThrow({
-        where: { id: userId },
-      })
-
-      return PaymentService.saveBankAccount(user.id, input.bankAccount as BankAccount)
-    }),
 
   processWithdrawal: Trpc.procedure
     .input(
       z.object({
         amount: z.string(),
-        bankAccount: z.object({
-          accountNumber: z
-            .string()
-            .regex(/^\d+$/, 'Account number must contain only digits')
-            .min(1),
-          bankCode: z
-            .string()
-            .regex(/^[A-Z0-9]+$/, 'Bank code must be alphanumeric')
-            .min(1)
-        }).strict().required()
+        phoneNumber: z.string()
+          .regex(/^(237|\\+237)?[6-9][0-9]{8}$/, 'Veuillez entrer un numéro de téléphone Camerounais valide')
       }).required()
     )
     .mutation(async ({ ctx, input }) => {
@@ -145,22 +78,16 @@ export const BillingRouter = Trpc.createRouter({
           where: { id: userId },
         })
 
-        // Validate bank account before withdrawal
-        await PaymentService.validateBankAccount(user.id, input.bankAccount as BankAccount)
-
-        // Save validated bank account
-        await PaymentService.saveBankAccount(user.id, input.bankAccount as BankAccount)
-
         // Process withdrawal
         return PaymentService.withdrawFromWallet({
-          customerId: user.id,
-          amount: input.amount,
-          bankAccount: input.bankAccount as BankAccount,
+          customerId: user.id as string,
+          amount: input.amount as string,
+          phoneNumber: input.phoneNumber as string
         })
       } catch (error) {
         throw new TRPCError({
           code: error.code || 'INTERNAL_SERVER_ERROR',
-          message: error.message || 'Failed to process withdrawal',
+          message: error.message || 'Le retrait Mobile Money a échoué. Veuillez réessayer.'
         })
       }
     }),
@@ -253,6 +180,8 @@ export const BillingRouter = Trpc.createRouter({
     .input(
       z.object({
         productId: z.string(),
+        phoneNumber: z.string()
+          .regex(/^(237|\\+237)?[6-9][0-9]{8}$/, 'Veuillez entrer un numéro de téléphone Camerounais valide')
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -277,6 +206,7 @@ export const BillingRouter = Trpc.createRouter({
           userId: user.id,
         },
         urlRedirection,
+        phoneNumber: input.phoneNumber
       })
 
       return { url }
