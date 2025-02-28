@@ -37,7 +37,7 @@ export const BillingRouter = Trpc.createRouter({
     .input(z.object({ 
       amount: z.string(),
       phoneNumber: z.string()
-        .regex(/^(237|\\+237)?[6-9][0-9]{8}$/, 'Veuillez entrer un numéro de téléphone Camerounais valide')
+        .regex(/^(237|\+237)?[6-9][0-9]{8}$/, 'Invalid Cameroon phone number')
     }))
     .mutation(async ({ ctx, input }) => {
       if (!PaymentService.isActive()) {

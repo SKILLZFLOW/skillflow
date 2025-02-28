@@ -124,14 +124,11 @@ export default function SettingsPage() {
   const handlePayoutSettingsSubmit = async (values: any) => {
     try {
       await processWithdrawal({
-        bankAccount: {
-          accountNumber: values.accountNumber,
-          bankCode: values.bankCode,
-        },
         amount: '0',
+        phoneNumber: values.phoneNumber || ''
       })
       message.success('Payout settings saved successfully')
-      form.resetFields(['accountNumber', 'bankCode'])
+      form.resetFields(['phoneNumber'])
     } catch (error) {
       message.error('Failed to save payout settings')
     }
@@ -333,31 +330,17 @@ export default function SettingsPage() {
             >
               <Form layout="vertical" onFinish={handlePayoutSettingsSubmit}>
                 <Form.Item
-                  label="Bank Account Number"
-                  name="accountNumber"
+                  label="Phone Number"
+                  name="phoneNumber"
                   rules={[
+                    { required: true, message: 'Phone number is required' },
                     {
-                      required: true,
-                      message: 'Bank account number is required',
-                    },
-                    { pattern: /^\d+$/, message: 'Please enter numbers only' },
-                  ]}
-                >
-                  <Input placeholder="Enter your bank account number" />
-                </Form.Item>
-
-                <Form.Item
-                  label="Bank Code"
-                  name="bankCode"
-                  rules={[
-                    { required: true, message: 'Bank code is required' },
-                    {
-                      pattern: /^[a-zA-Z0-9]+$/,
-                      message: 'Please enter valid bank code',
+                      pattern: /^(237|\+237)?[6-9][0-9]{8}$/,
+                      message: 'Please enter a valid Cameroon phone number',
                     },
                   ]}
                 >
-                  <Input placeholder="Enter your bank code" />
+                  <Input addonBefore="+237" placeholder="Enter your phone number" />
                 </Form.Item>
 
                 <Form.Item>

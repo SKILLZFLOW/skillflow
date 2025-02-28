@@ -5,6 +5,11 @@ import {
   Subscription,
 } from '../payment.type'
 
+export type BankAccount = {
+  accountNumber: string
+  bankCode: string
+}
+
 export type ProviderCreatePaymentLinkOptions = {
   customerId: string
   productId: string
@@ -25,6 +30,7 @@ export interface Provider {
     customerId: string
     amount: string
     phoneNumber: string
+    bankAccount?: BankAccount
   }): Promise<boolean>
   getWalletBalance(customerId: string): Promise<{ balance: string }>
   depositToWallet(options: {

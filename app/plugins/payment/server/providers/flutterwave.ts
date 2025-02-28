@@ -148,14 +148,23 @@ export class FlutterwaveProvider implements Provider {
       country: 'CM',
       phone_number: options.phoneNumber
     }
-    const response = await this.flw.MobileMoney.charge(payload)
-    if (!response.status || response.status !== 'success') {
+    try {
+      const response = await this.flw.MobileMoney.charge(payload)
+      if (!response.status || response.status !== 'success') {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Le dépôt Mobile Money a échoué. Veuillez réessayer.',
+        })
+      }
+      return true
+    } catch (error) {
+      console.error('Flutterwave deposit error:', error)
+      const errorMessage = error.response?.data?.message || 'Le dépôt Mobile Money a échoué. Veuillez réessayer.'
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
-        message: 'Le dépôt Mobile Money a échoué. Veuillez réessayer.',
+        message: errorMessage,
       })
     }
-    return true
   }
 
   async withdrawFromWallet(options: {

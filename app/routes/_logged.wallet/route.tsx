@@ -44,16 +44,18 @@ export default function WalletPage() {
   const { mutateAsync: processWithdrawal } =
     Api.billing.processWithdrawal.useMutation()
 
-  const handleDeposit = async (event: React.MouseEvent<HTMLElement>) => {
+  const handleDeposit = async (values: WithdrawFormValues) => {
     try {
-      const values = await depositForm.validateFields()
-      await initiateDeposit({ amount: values.amount })
+      await initiateDeposit({ 
+        amount: values.amount,
+        phoneNumber: values.phoneNumber 
+      })
       setIsDepositModalVisible(false)
       depositForm.resetFields()
       refetchWallet()
       message.success('Mobile Money deposit initiated successfully')
     } catch (error) {
-      message.error('Failed to initiate Mobile Money deposit')
+      message.error(error.message)
     }
   }
 
@@ -136,18 +138,24 @@ export default function WalletPage() {
       </Row>
 
       <Modal
-        title="Mobile Money Deposit"
+        title="Mobile Money Deposit" 
         open={isDepositModalVisible}
-        onOk={handleDeposit}
+        onOk={() => depositForm.submit()}
         onCancel={() => setIsDepositModalVisible(false)}
       >
-        <Form form={depositForm}>
+        <Form form={depositForm} onFinish={handleDeposit}>
           <Form.Item
             name="amount"
             label="Amount"
             rules={[
               { required: true, message: 'Please enter deposit amount' },
               { pattern: /^\d+$/, message: 'Please enter a valid amount' },
+              { validator: (_, value) => {
+                if (value && parseInt(value) <= 0) {
+                  return Promise.reject('Amount must be greater than 0');
+                }
+                return Promise.resolve();
+              }}
             ]}
           >
             <Input prefix="XAF" />
