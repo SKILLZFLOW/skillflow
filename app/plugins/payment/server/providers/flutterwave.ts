@@ -158,8 +158,17 @@ export class FlutterwaveProvider implements Provider {
       }
       return true
     } catch (error) {
-      console.error('Flutterwave deposit error:', error)
-      const errorMessage = error.response?.data?.message || 'Le dépôt Mobile Money a échoué. Veuillez réessayer.'
+      console.error('Flutterwave API Error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      })
+      const errorCode = error.response?.data?.code
+      const errorMessage = {
+        'INSUFFICIENT_FUNDS': 'Solde insuffisant pour effectuer le dépôt',
+        'INVALID_PHONE': 'Numéro de téléphone invalide', 
+        'NETWORK_ERROR': 'Erreur réseau, veuillez réessayer'
+      }[errorCode] || 'Le dépôt Mobile Money a échoué. Veuillez réessayer.'
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: errorMessage,

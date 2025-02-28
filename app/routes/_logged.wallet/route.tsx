@@ -27,6 +27,7 @@ export default function WalletPage() {
   const [withdrawForm] = Form.useForm()
   const [isWithdrawModalVisible, setIsWithdrawModalVisible] = useState(false)
   const [isDepositModalVisible, setIsDepositModalVisible] = useState(false)
+  const [isDepositing, setIsDepositing] = useState(false)
   const [depositForm] = Form.useForm()
 
   const { data: wallet, refetch: refetchWallet } =
@@ -45,6 +46,7 @@ export default function WalletPage() {
     Api.billing.processWithdrawal.useMutation()
 
   const handleDeposit = async (values: WithdrawFormValues) => {
+    setIsDepositing(true)
     try {
       await initiateDeposit({ 
         amount: values.amount,
@@ -53,9 +55,11 @@ export default function WalletPage() {
       setIsDepositModalVisible(false)
       depositForm.resetFields()
       refetchWallet()
-      message.success('Mobile Money deposit initiated successfully')
+      message.success('Dépôt Mobile Money initié avec succès')
     } catch (error) {
       message.error(error.message)
+    } finally {
+      setIsDepositing(false)
     }
   }
 
@@ -142,6 +146,7 @@ export default function WalletPage() {
         open={isDepositModalVisible}
         onOk={() => depositForm.submit()}
         onCancel={() => setIsDepositModalVisible(false)}
+        okButtonProps={{ loading: isDepositing }}
       >
         <Form form={depositForm} onFinish={handleDeposit}>
           <Form.Item
